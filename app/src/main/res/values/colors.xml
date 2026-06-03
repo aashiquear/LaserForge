@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Page background -->
+    <color name="bg_start">#1a1a2e</color>
+    <color name="bg_mid">#16213e</color>
+    <color name="bg_end">#0f3460</color>
+
+    <!-- Container glass card -->
+    <color name="container_glass">#14FFFFFF</color>
+
+    <!-- Title gradient -->
+    <color name="title_start">#00d4ff</color>
+    <color name="title_end">#7b2cbf</color>
+
+    <!-- Subtitle -->
+    <color name="subtitle">#B3FFFFFF</color>
+
+    <!-- Mode button -->
+    <color name="mode_btn_bg">#0DFFFFFF</color>
+    <color name="mode_btn_border">#33FFFFFF</color>
+    <color name="mode_btn_active_start">#667eea</color>
+    <color name="mode_btn_active_end">#764ba2</color>
+
+    <!-- Shape option (laser) -->
+    <color name="shape_option_bg">#0DFFFFFF</color>
+    <color name="shape_option_border">#33FFFFFF</color>
+
+    <!-- Target preview -->
+    <color name="target_bg">#4D000000</color>
+    <color name="target_canvas_border">#33FFFFFF</color>
+    <color name="target_canvas_bg">#1a1a1a</color>
+
+    <!-- Match result -->
+    <color name="match_result_start">#f093fb</color>
+    <color name="match_result_end">#f5576c</color>
+
+    <!-- Slider track -->
+    <color name="slider_track">#33FFFFFF</color>
+    <color name="slider_value">#00d4ff</color>
+
+    <!-- Status bar -->
+    <color name="status_bar_bg">#B3000000</color>
+    <color name="status_message_bg">#4D000000</color>
+    <color name="status_message_accent">#00d4ff</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B3FFFFFF</color>
+
+    <!-- Coordinate colors -->
+    <color name="coord_x">#00ffff</color>
+    <color name="coord_y">#ffff00</color>
+    <color name="coord_layer">#ff66ff</color>
+    <color name="coord_height">#66ff66</color>
+    <color name="coord_laser">#ff9933</color>
+    <color name="coord_value_bg">#1AFFFFFF</color>
+
+    <!-- Laser status states -->
+    <color name="laser_firing_bg">#4DFF0000</color>
+    <color name="laser_firing_text">#ff4444</color>
+    <color name="laser_ready_bg">#3300FF00</color>
+    <color name="laser_ready_text">#66ff66</color>
+    <color name="laser_wait_bg">#33FFA500</color>
+    <color name="laser_wait_text">#ffaa44</color>
+
+    <!-- Pointer indicator -->
+    <color name="pointer_off">#444444</color>
+    <color name="pointer_active">#00ff00</color>
+    <color name="pointer_firing">#ff0000</color>
+
+    <!-- Canvas container -->
+    <color name="canvas_bg">#0a0a0a</color>
+    <color name="crosshair">#CCFF0000</color>
+
+    <!-- Camera controls -->
+    <color name="camera_btn_bg">#B3000000</color>
+    <color name="camera_btn_pressed">#4DFFFFFF</color>
+
+    <!-- Control panel -->
+    <color name="panel_bg">#14FFFFFF</color>
+
+    <!-- Joystick -->
+    <color name="joystick_bg_inner">#2a2a2a</color>
+    <color name="joystick_bg_outer">#1a1a1a</color>
+    <color name="joystick_border">#33FFFFFF</color>
+    <color name="joystick_base">#19646464</color>
+    <color name="joystick_base_border">#26FFFFFF</color>
+    <color name="joystick_handle_start">#667eea</color>
+    <color name="joystick_handle_end">#764ba2</color>
+    <color name="joystick_handle_active_start">#ff6b6b</color>
+    <color name="joystick_handle_active_end">#ff0000</color>
+
+    <!-- Laser toggle button -->
+    <color name="laser_btn_border">#33FFFFFF</color>
+    <color name="laser_btn_bg_start">#2d2d2d</color>
+    <color name="laser_btn_bg_end">#1a1a1a</color>
+    <color name="laser_btn_firing_start">#ff4444</color>
+    <color name="laser_btn_firing_end">#cc0000</color>
+
+    <!-- Action buttons -->
+    <color name="next_layer_start">#00c9ff</color>
+    <color name="next_layer_end">#92fe9d</color>
+    <color name="finish_start">#f093fb</color>
+    <color name="finish_end">#f5576c</color>
+    <color name="reset_start">#667eea</color>
+    <color name="reset_end">#764ba2</color>
+
+    <!-- Instructions -->
+    <color name="instructions_toggle_bg">#1AFFFFFF</color>
+    <color name="instructions_content_bg">#33000000</color>
+    <color name="instructions_h4">#00d4ff</color>
+</resources>

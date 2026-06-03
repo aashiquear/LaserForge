@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#33FFFFFF">
+    <item>
+        <shape android:shape="oval">
+            <gradient
+                android:type="linear"
+                android:angle="135"
+                android:startColor="@color/laser_btn_bg_start"
+                android:endColor="@color/laser_btn_bg_end" />
+            <stroke
+                android:width="3dp"
+                android:color="@color/laser_btn_border" />
+        </shape>
+    </item>
+</ripple>

@@ -1,0 +1,2444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3D LPBF Metal 3D Printing Simulator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            margin: 0;
+            padding: 10px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            max-width: 900px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            margin: 0 0 5px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            text-align: center;
+            margin: 0 0 10px 0;
+            opacity: 0.7;
+            font-size: 11px;
+        }
+        
+        /* Compact Game Mode */
+        .game-mode {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .mode-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .mode-btn {
+            padding: 8px 14px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            transition: all 0.3s;
+            touch-action: manipulation;
+        }
+        
+        .mode-btn:hover, .mode-btn:active {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.02);
+        }
+        
+        .mode-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .target-preview {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .target-preview canvas {
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: #1a1a1a;
+            max-width: 100%;
+        }
+        
+        #target3DCanvas {
+            width: 200px;
+            height: 150px;
+        }
+        
+        .shape-choice {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .shape-choice-btn {
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: bold;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s;
+            touch-action: manipulation;
+        }
+        
+        .shape-choice-btn:hover, .shape-choice-btn:active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .match-result {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Laser Controls - Compact */
+        .laser-controls {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: grid;
+            gap: 8px;
+        }
+        
+        .slider-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .slider-container label {
+            font-size: 10px;
+            font-weight: bold;
+            opacity: 0.8;
+        }
+        
+        .slider-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .slider-container input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        
+        .slider-value {
+            font-size: 11px;
+            font-weight: bold;
+            min-width: 45px;
+            text-align: right;
+            color: #00d4ff;
+        }
+        
+        /* Laser Shape Selector */
+        .laser-shape-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .laser-shape-selector label {
+            font-size: 10px;
+            font-weight: bold;
+            opacity: 0.8;
+        }
+        
+        .shape-options {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .shape-option {
+            padding: 4px 8px;
+            font-size: 9px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.05);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            touch-action: manipulation;
+        }
+        
+        .shape-option:hover, .shape-option:active {
+            background: rgba(255,255,255,0.15);
+        }
+        
+        .shape-option.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+        }
+        
+        /* Status Bar - Top (Coordinates) */
+        .status-bar {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 12px;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+        }
+        
+        /* Status Bar - Bottom (Layer Info) */
+        .status-bar-bottom {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 12px;
+            border-radius: 0 0 10px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+        }
+        
+        .coord-display {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .coord-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .coord-label {
+            color: #00ffff;
+            font-weight: bold;
+            font-size: 10px;
+        }
+        
+        .coord-label.y-label {
+            color: #ffff00;
+        }
+        
+        .coord-label.layer-label {
+            color: #ff66ff;
+        }
+        
+        .coord-label.height-label {
+            color: #66ff66;
+        }
+        
+        .coord-label.laser-label {
+            color: #ff9933;
+        }
+        
+        .coord-value {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            min-width: 50px;
+            text-align: center;
+            font-size: 11px;
+        }
+        
+        .coord-value.laser-status {
+            min-width: 55px;
+            font-weight: bold;
+        }
+        
+        .coord-value.laser-status.firing {
+            background: rgba(255, 0, 0, 0.3);
+            color: #ff4444;
+            animation: statusPulse 0.5s infinite;
+        }
+        
+        .coord-value.laser-status.ready {
+            background: rgba(0, 255, 0, 0.2);
+            color: #66ff66;
+        }
+        
+        .coord-value.laser-status.wait {
+            background: rgba(255, 165, 0, 0.2);
+            color: #ffaa44;
+        }
+        
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        .pointer-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .pointer-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #444;
+            transition: all 0.2s;
+        }
+        
+        .pointer-indicator.active {
+            background: #00ff00;
+            box-shadow: 0 0 8px #00ff00;
+        }
+        
+        .pointer-indicator.firing {
+            background: #ff0000;
+            box-shadow: 0 0 10px #ff0000;
+            animation: pulse 0.3s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Canvas Container */
+        #canvas-container {
+            background: #0a0a0a;
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 300px;
+            touch-action: none;
+        }
+        
+        .crosshair {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 0, 0, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            display: none;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+        
+        .crosshair::before,
+        .crosshair::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 0, 0, 0.8);
+        }
+        
+        .crosshair::before {
+            width: 2px;
+            height: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .crosshair::after {
+            height: 2px;
+            width: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        /* Camera Controls - Compact */
+        .camera-controls {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 100;
+        }
+        
+        .camera-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+        }
+        
+        .camera-btn:hover, .camera-btn:active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .camera-row {
+            display: flex;
+            gap: 4px;
+        }
+        
+        /* Control Panel - Joystick + Buttons */
+        .control-panel {
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            gap: 15px;
+            margin-top: 10px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .joystick-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .visual-joystick-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #2a2a2a 0%, #1a1a1a 100%);
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.5);
+            touch-action: none;
+            flex-shrink: 0;
+        }
+        
+        .joystick-base {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            background: rgba(100, 100, 100, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+        }
+        
+        .joystick-handle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: grab;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            transition: box-shadow 0.2s;
+            touch-action: none;
+        }
+        
+        .joystick-handle:active {
+            cursor: grabbing;
+        }
+        
+        .joystick-handle.active {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff0000 100%);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+        }
+        
+        /* Laser Toggle Button */
+        .laser-toggle-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            touch-action: manipulation;
+            flex-shrink: 0;
+        }
+        
+        .laser-toggle-btn:hover, .laser-toggle-btn:active {
+            transform: scale(1.05);
+        }
+        
+        .laser-toggle-btn.firing {
+            background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            border-color: #ff6666;
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.6);
+            animation: laserPulse 0.5s infinite;
+        }
+        
+        @keyframes laserPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.5); }
+            50% { box-shadow: 0 0 30px rgba(255, 0, 0, 0.8); }
+        }
+        
+        .laser-toggle-btn .laser-icon {
+            font-size: 20px;
+        }
+        
+        /* Action Buttons Column */
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            justify-content: center;
+        }
+        
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            font-size: 12px;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+            min-width: 130px;
+            justify-content: center;
+            touch-action: manipulation;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            transition: transform 0.3s;
+        }
+        
+        .action-btn:hover::before, .action-btn:active::before {
+            transform: scale(1.05);
+        }
+        
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .action-btn .btn-icon {
+            font-size: 18px;
+        }
+        
+        #nextLayer {
+            background: linear-gradient(135deg, #00c9ff 0%, #92fe9d 100%);
+            box-shadow: 0 4px 15px rgba(0, 201, 255, 0.3);
+        }
+        
+        #nextLayer:hover, #nextLayer:active {
+            box-shadow: 0 6px 20px rgba(0, 201, 255, 0.5);
+        }
+        
+        #finishProduct {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+        }
+        
+        #finishProduct:hover, #finishProduct:active {
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.5);
+        }
+        
+        #reset {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        #reset:hover, #reset:active {
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+        
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Status Message */
+        .status {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+            border-left: 3px solid #00d4ff;
+        }
+        
+        /* Match Result */
+        #matchResult {
+            margin-top: 10px;
+        }
+        
+        /* Instructions - Collapsible */
+        .instructions-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+            touch-action: manipulation;
+        }
+        
+        .instructions-toggle:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .instructions-content {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 0 0 8px 8px;
+            font-size: 11px;
+            line-height: 1.5;
+            display: none;
+        }
+        
+        .instructions-content.show {
+            display: block;
+        }
+        
+        .instructions-content h4 {
+            margin: 10px 0 5px 0;
+            color: #00d4ff;
+            font-size: 11px;
+        }
+        
+        .instructions-content ul {
+            margin: 0;
+            padding-left: 15px;
+        }
+        
+        .instructions-content li {
+            margin: 3px 0;
+        }
+        
+        /* Touch hint */
+        .touch-hint {
+            text-align: center;
+            font-size: 10px;
+            opacity: 0.6;
+            margin-top: 8px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 500px) {
+            body {
+                padding: 5px;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            #gameCanvas {
+                height: 250px;
+            }
+            
+            .visual-joystick-container {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .joystick-base {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .joystick-handle {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .laser-toggle-btn {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .action-btn {
+                padding: 8px 12px;
+                font-size: 11px;
+                min-width: 110px;
+            }
+            
+            .control-panel {
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            .slider-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔬 LPBF Metal 3D Printing Simulator</h1>
+        <div class="subtitle">Laser Powder Bed Fusion Experience</div>
+        
+        <!-- Game Mode -->
+        <div class="game-mode">
+            <div class="mode-buttons">
+                <button class="mode-btn active" data-mode="free">🎨 Free Draw</button>
+                <button class="mode-btn" data-mode="2d">📝 2D Shape</button>
+                <button class="mode-btn" data-mode="3d">📦 3D Shape</button>
+            </div>
+            <div id="targetPreview" class="target-preview" style="display: none;">
+                <div id="shapeChoice" class="shape-choice" style="display: none;">
+                    <button class="shape-choice-btn" data-type="alphanumeric">🔤 Letters/Numbers</button>
+                    <button class="shape-choice-btn" data-type="emoji">😊 Symbols</button>
+                </div>
+                <div id="shapeChoice3D" class="shape-choice" style="display: none;">
+                    <button class="shape-choice-btn" data-type="solid">📦 Solid</button>
+                    <button class="shape-choice-btn" data-type="frame">🔲 Frame</button>
+                </div>
+                <div id="targetDisplay" style="display: none;">
+                    <p style="margin: 5px 0; font-size: 12px;">🎯 Target: <strong id="shapeName"></strong> | Layers: <strong id="recommendedLayers">1</strong></p>
+                    <canvas id="targetCanvas" width="200" height="150" style="display: none;"></canvas>
+                    <canvas id="target3DCanvas"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Laser Controls -->
+        <div class="laser-controls">
+            <div class="slider-row">
+                <div class="slider-container">
+                    <label>Laser Width</label>
+                    <div class="slider-wrapper">
+                        <input type="range" id="laserWidth" min="1" max="5" value="2" step="0.5">
+                        <span class="slider-value"><span id="laserWidthValue">2.0</span>mm</span>
+                    </div>
+                </div>
+                <div class="slider-container">
+                    <label>Laser Power</label>
+                    <div class="slider-wrapper">
+                        <input type="range" id="laserPower" min="50" max="200" value="100" step="10">
+                        <span class="slider-value"><span id="laserPowerValue">100</span>W</span>
+                    </div>
+                </div>
+            </div>
+            <div class="slider-row">
+                <div class="slider-container">
+                    <label>Layer Thickness</label>
+                    <div class="slider-wrapper">
+                        <input type="range" id="layerThicknessSlider" min="0.05" max="0.30" value="0.12" step="0.01">
+                        <span class="slider-value"><span id="layerThicknessValue">0.12</span>mm</span>
+                    </div>
+                </div>
+                <div class="laser-shape-selector">
+                    <label>Laser Shape</label>
+                    <div class="shape-options">
+                        <button class="shape-option active" data-shape="gaussian">Gaussian</button>
+                        <button class="shape-option" data-shape="tophat">Top Hat</button>
+                        <button class="shape-option" data-shape="doughnut">Doughnut</button>
+                        <button class="shape-option" data-shape="elliptical">Elliptical</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Status Message -->
+        <div class="status" id="statusMessage">
+            Spread powder layer, then draw your laser path
+        </div>
+        
+        <!-- Coordinate Status Bar -->
+        <div class="status-bar">
+            <div class="coord-display">
+                <div class="coord-item">
+                    <span class="coord-label">X:</span>
+                    <span class="coord-value" id="coordX">0.00</span>
+                </div>
+                <div class="coord-item">
+                    <span class="coord-label y-label">Y:</span>
+                    <span class="coord-value" id="coordY">0.00</span>
+                </div>
+            </div>
+            <div class="pointer-status">
+                <div class="pointer-indicator" id="pointerIndicator"></div>
+                <span id="pointerStatusText">Ready</span>
+            </div>
+        </div>
+        
+        <!-- Canvas Container -->
+        <div id="canvas-container">
+            <canvas id="gameCanvas"></canvas>
+            <div class="crosshair" id="crosshair"></div>
+            
+            <!-- Camera Controls -->
+            <div class="camera-controls">
+                <button class="camera-btn" id="zoomIn" title="Zoom In">+</button>
+                <button class="camera-btn" id="zoomOut" title="Zoom Out">−</button>
+                <div class="camera-row">
+                    <button class="camera-btn" id="rotateLeft" title="Rotate Left">↺</button>
+                    <button class="camera-btn" id="rotateRight" title="Rotate Right">↻</button>
+                </div>
+                <button class="camera-btn" id="resetCamera" title="Reset View">⌂</button>
+            </div>
+        </div>
+        
+        <!-- Bottom Status Bar (Layer Info) -->
+        <div class="status-bar-bottom">
+            <div class="coord-display">
+                <div class="coord-item">
+                    <span class="coord-label layer-label">LAYER:</span>
+                    <span class="coord-value" id="layerCount">1</span>
+                </div>
+                <div class="coord-item">
+                    <span class="coord-label height-label">HEIGHT:</span>
+                    <span class="coord-value" id="buildHeight">0.0mm</span>
+                </div>
+            </div>
+            <div class="coord-item">
+                <span class="coord-label laser-label">LASER:</span>
+                <span class="coord-value laser-status ready" id="laserStatus">READY</span>
+            </div>
+        </div>
+        
+        <!-- Control Panel: Joystick + Action Buttons -->
+        <div class="control-panel">
+            <div class="joystick-section">
+                <div class="visual-joystick-container" id="joystickContainer">
+                    <div class="joystick-base"></div>
+                    <div class="joystick-handle" id="joystickHandle"></div>
+                </div>
+                
+                <button class="laser-toggle-btn" id="laserToggleBtn">
+                    <span class="laser-icon">⚡</span>
+                    <span>FIRE</span>
+                </button>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="action-btn" id="nextLayer">
+                    <span class="btn-icon">⬇️</span>
+                    <span>Next Layer</span>
+                </button>
+                <button class="action-btn" id="finishProduct">
+                    <span class="btn-icon">✨</span>
+                    <span>Finish</span>
+                </button>
+                <button class="action-btn" id="reset">
+                    <span class="btn-icon">🔄</span>
+                    <span>Reset</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="touch-hint">
+            💡 Draw on surface • Drag joystick + tap FIRE • Pinch to zoom
+        </div>
+        
+        <!-- Match Result -->
+        <div id="matchResult"></div>
+        
+        <!-- Collapsible Instructions -->
+        <div class="instructions-toggle" id="instructionsToggle">
+            <span>📖 Instructions</span>
+            <span id="toggleArrow">▼</span>
+        </div>
+        <div class="instructions-content" id="instructionsContent">
+            <h4>🎮 Game Modes</h4>
+            <ul>
+                <li><strong>Free Draw:</strong> Create anything!</li>
+                <li><strong>2D Shape:</strong> Match letters or symbols</li>
+                <li><strong>3D Shape:</strong> Build solid or frame objects</li>
+            </ul>
+            
+            <h4>🎯 Controls</h4>
+            <ul>
+                <li><strong>Draw:</strong> Touch/click directly on powder</li>
+                <li><strong>Joystick:</strong> Move laser position</li>
+                <li><strong>FIRE button:</strong> Toggle laser on/off</li>
+                <li><strong>Camera:</strong> Buttons or pinch/drag</li>
+            </ul>
+            
+            <h4>⚙️ Laser Shapes</h4>
+            <ul>
+                <li><strong>Gaussian:</strong> Standard bell curve intensity</li>
+                <li><strong>Top Hat:</strong> Uniform flat intensity</li>
+                <li><strong>Doughnut:</strong> Ring pattern (hollow center)</li>
+                <li><strong>Elliptical:</strong> Oval-shaped beam</li>
+            </ul>
+            
+            <h4>🔧 Process</h4>
+            <ul>
+                <li>Watch recoater spread powder</li>
+                <li>Draw laser path (silver = melted metal)</li>
+                <li>Click "Next Layer" to continue</li>
+                <li>Click "Finish" when done</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Prevent default touch behaviors on buttons
+        document.querySelectorAll('button, .action-btn, .mode-btn, .shape-choice-btn, .shape-option, .camera-btn, .laser-toggle-btn').forEach(btn => {
+            btn.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                this.click();
+            }, { passive: false });
+        });
+        
+        const canvas = document.getElementById('gameCanvas');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a1a2e);
+        
+        const camera = new THREE.PerspectiveCamera(50, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+        camera.position.set(15, 12, 15);
+        camera.lookAt(0, 0, 0);
+        
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        
+        // Target 3D preview
+        const target3DCanvas = document.getElementById('target3DCanvas');
+        const target3DScene = new THREE.Scene();
+        target3DScene.background = new THREE.Color(0x1a1a1a);
+        
+        const target3DCamera = new THREE.PerspectiveCamera(50, 200/150, 0.1, 100);
+        target3DCamera.position.set(5, 4, 5);
+        target3DCamera.lookAt(0, 0, 0);
+        
+        const target3DRenderer = new THREE.WebGLRenderer({ canvas: target3DCanvas, antialias: true });
+        target3DRenderer.setSize(200, 150);
+        
+        const target3DAmbient = new THREE.AmbientLight(0x606060, 1);
+        target3DScene.add(target3DAmbient);
+        const target3DLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        target3DLight.position.set(5, 10, 5);
+        target3DScene.add(target3DLight);
+        
+        let target3DMesh = null;
+        let target3DAngle = 0;
+        
+        // Game state
+        let gameMode = 'free';
+        let targetShape = null;
+        let targetVoxels = [];
+        let shapeType = null;
+        let laserShape = 'gaussian';
+        
+        // Shape definitions
+        const alphanumericShapes = [
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+            'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
+        ];
+        
+        const emojiShapes = [
+            { char: '☺', name: 'Smiley' },
+            { char: '○', name: 'Circle' },
+            { char: '△', name: 'Triangle' },
+            { char: '□', name: 'Square' },
+            { char: '♡', name: 'Heart' },
+            { char: '★', name: 'Star' },
+            { char: '◇', name: 'Diamond' },
+            { char: '⬢', name: 'Hexagon' }
+        ];
+        
+        const shape3DDefinitions = {
+            solid: [
+                { name: 'Pyramid', layers: 8 },
+                { name: 'Cube', layers: 6 },
+                { name: 'Cylinder', layers: 8 },
+                { name: 'Cone', layers: 8 },
+                { name: 'Sphere', layers: 10 }
+            ],
+            frame: [
+                { name: 'Pyramid Frame', layers: 8 },
+                { name: 'Cube Frame', layers: 6 },
+                { name: 'Cylinder Frame', layers: 8 },
+                { name: 'Cone Frame', layers: 8 }
+            ]
+        };
+        
+        function createTarget3DPreview(shape, type) {
+            if (target3DMesh) {
+                target3DScene.remove(target3DMesh);
+            }
+            
+            const group = new THREE.Group();
+            const voxelSize = 0.15;
+            const material = new THREE.MeshStandardMaterial({ 
+                color: 0x00d4ff,
+                metalness: 0.7,
+                roughness: 0.3,
+                transparent: true,
+                opacity: 0.9
+            });
+            
+            const layers = shape.layers;
+            const radius = 1.5;
+            
+            if (shape.name.includes('Pyramid')) {
+                for (let layer = 0; layer < layers; layer++) {
+                    const size = radius * (1 - layer / layers);
+                    const y = layer * voxelSize;
+                    
+                    if (type === 'solid') {
+                        for (let x = -size; x <= size; x += voxelSize * 1.2) {
+                            for (let z = -size; z <= size; z += voxelSize * 1.2) {
+                                const voxel = new THREE.Mesh(new THREE.BoxGeometry(voxelSize, voxelSize, voxelSize), material);
+                                voxel.position.set(x, y, z);
+                                group.add(voxel);
+                            }
+                        }
+                    } else {
+                        for (let x = -size; x <= size; x += voxelSize * 1.2) {
+                            group.add(createVoxel(x, y, -size, voxelSize, material));
+                            group.add(createVoxel(x, y, size, voxelSize, material));
+                        }
+                        for (let z = -size + voxelSize; z < size; z += voxelSize * 1.2) {
+                            group.add(createVoxel(-size, y, z, voxelSize, material));
+                            group.add(createVoxel(size, y, z, voxelSize, material));
+                        }
+                    }
+                }
+            } else if (shape.name.includes('Cube')) {
+                for (let layer = 0; layer < layers; layer++) {
+                    const y = layer * voxelSize;
+                    
+                    if (type === 'solid') {
+                        for (let x = -radius; x <= radius; x += voxelSize * 1.2) {
+                            for (let z = -radius; z <= radius; z += voxelSize * 1.2) {
+                                group.add(createVoxel(x, y, z, voxelSize, material));
+                            }
+                        }
+                    } else {
+                        for (let x = -radius; x <= radius; x += voxelSize * 1.2) {
+                            group.add(createVoxel(x, y, -radius, voxelSize, material));
+                            group.add(createVoxel(x, y, radius, voxelSize, material));
+                        }
+                        for (let z = -radius + voxelSize; z < radius; z += voxelSize * 1.2) {
+                            group.add(createVoxel(-radius, y, z, voxelSize, material));
+                            group.add(createVoxel(radius, y, z, voxelSize, material));
+                        }
+                    }
+                }
+            } else if (shape.name.includes('Cylinder')) {
+                for (let layer = 0; layer < layers; layer++) {
+                    const y = layer * voxelSize;
+                    
+                    for (let angle = 0; angle < Math.PI * 2; angle += 0.3) {
+                        if (type === 'solid') {
+                            for (let r = 0; r <= radius; r += voxelSize * 1.2) {
+                                group.add(createVoxel(Math.cos(angle) * r, y, Math.sin(angle) * r, voxelSize, material));
+                            }
+                        } else {
+                            group.add(createVoxel(Math.cos(angle) * radius, y, Math.sin(angle) * radius, voxelSize, material));
+                        }
+                    }
+                }
+            } else if (shape.name.includes('Cone')) {
+                for (let layer = 0; layer < layers; layer++) {
+                    const r = radius * (1 - layer / layers);
+                    const y = layer * voxelSize;
+                    
+                    for (let angle = 0; angle < Math.PI * 2; angle += 0.3) {
+                        if (type === 'solid') {
+                            for (let rad = 0; rad <= r; rad += voxelSize * 1.2) {
+                                group.add(createVoxel(Math.cos(angle) * rad, y, Math.sin(angle) * rad, voxelSize, material));
+                            }
+                        } else {
+                            group.add(createVoxel(Math.cos(angle) * r, y, Math.sin(angle) * r, voxelSize, material));
+                        }
+                    }
+                }
+            } else if (shape.name.includes('Sphere')) {
+                for (let layer = 0; layer < layers; layer++) {
+                    const t = layer / (layers - 1);
+                    const angle = Math.PI * t;
+                    const r = Math.sin(angle) * radius;
+                    const y = layer * voxelSize;
+                    
+                    for (let a = 0; a < Math.PI * 2; a += 0.3) {
+                        if (type === 'solid') {
+                            for (let rad = 0; rad <= r; rad += voxelSize * 1.2) {
+                                group.add(createVoxel(Math.cos(a) * rad, y, Math.sin(a) * rad, voxelSize, material));
+                            }
+                        } else {
+                            group.add(createVoxel(Math.cos(a) * r, y, Math.sin(a) * r, voxelSize, material));
+                        }
+                    }
+                }
+            }
+            
+            // Center the group
+            const box = new THREE.Box3().setFromObject(group);
+            const center = box.getCenter(new THREE.Vector3());
+            group.position.sub(center);
+            group.position.y += (box.max.y - box.min.y) / 2;
+            
+            target3DMesh = group;
+            target3DScene.add(target3DMesh);
+        }
+        
+        function createVoxel(x, y, z, size, material) {
+            const voxel = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), material);
+            voxel.position.set(x, y, z);
+            return voxel;
+        }
+        
+        function generate2DShape(type) {
+            shapeType = type;
+            let shapeChar, shapeName;
+            
+            if (type === 'alphanumeric') {
+                shapeChar = alphanumericShapes[Math.floor(Math.random() * alphanumericShapes.length)];
+                shapeName = shapeChar;
+            } else {
+                const emojiObj = emojiShapes[Math.floor(Math.random() * emojiShapes.length)];
+                shapeChar = emojiObj.char;
+                shapeName = emojiObj.name;
+            }
+            
+            targetShape = shapeChar;
+            
+            const targetCanvas = document.getElementById('targetCanvas');
+            const ctx = targetCanvas.getContext('2d');
+            ctx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.font = type === 'alphanumeric' ? 'bold 120px Arial' : '100px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(shapeChar, 100, 75);
+            
+            targetVoxels = [];
+            const scale = 4.5 / 100;
+            
+            const imageData = ctx.getImageData(0, 0, 200, 150);
+            for (let y = 0; y < 150; y += 2) {
+                for (let x = 0; x < 200; x += 2) {
+                    const idx = (y * 200 + x) * 4;
+                    if (imageData.data[idx + 3] > 128) {
+                        targetVoxels.push({ x: (x - 100) * scale, z: (75 - y) * scale });
+                    }
+                }
+            }
+            
+            // Show 2D canvas, hide 3D
+            document.getElementById('targetCanvas').style.display = 'block';
+            document.getElementById('target3DCanvas').style.display = 'none';
+            
+            document.getElementById('shapeName').textContent = shapeName;
+            document.getElementById('recommendedLayers').textContent = '1-2';
+            document.getElementById('shapeChoice').style.display = 'none';
+            document.getElementById('targetDisplay').style.display = 'block';
+        }
+        
+        function generate3DShape(type) {
+            shapeType = type;
+            const shapes = shape3DDefinitions[type];
+            const selected = shapes[Math.floor(Math.random() * shapes.length)];
+            
+            targetShape = selected.name;
+            
+            // Generate 3D preview
+            createTarget3DPreview(selected, type);
+            
+            // Generate target voxels
+            generateTargetVoxels3D(selected, type);
+            
+            // Show 3D canvas, hide 2D
+            document.getElementById('targetCanvas').style.display = 'none';
+            document.getElementById('target3DCanvas').style.display = 'block';
+            
+            document.getElementById('shapeName').textContent = selected.name;
+            document.getElementById('recommendedLayers').textContent = selected.layers.toString();
+            document.getElementById('shapeChoice3D').style.display = 'none';
+            document.getElementById('targetDisplay').style.display = 'block';
+        }
+        
+        function generateTargetVoxels3D(shape, type) {
+            targetVoxels = [];
+            const layers = shape.layers;
+            const radius = 2;
+            
+            if (shape.name.includes('Pyramid')) {
+                for (let layer = 0; layer < layers; layer++) {
+                    const size = radius * (1 - layer / layers);
+                    if (type === 'solid') {
+                        for (let x = -size; x <= size; x += 0.3) {
+                            for (let z = -size; z <= size; z += 0.3) {
+                                targetVoxels.push({ x, z, layer });
+                            }
+                        }
+                    } else {
+                        for (let x = -size; x <= size; x += 0.3) {
+                            targetVoxels.push({ x, z: -size, layer });
+                            targetVoxels.push({ x, z: size, layer });
+                        }
+                        for (let z = -size; z <= size; z += 0.3) {
+                            targetVoxels.push({ x: -size, z, layer });
+                            targetVoxels.push({ x: size, z, layer });
+                        }
+                    }
+                }
+            } else if (shape.name.includes('Cube')) {
+                for (let layer = 0; layer < layers; layer++) {
+                    if (type === 'solid') {
+                        for (let x = -radius; x <= radius; x += 0.3) {
+                            for (let z = -radius; z <= radius; z += 0.3) {
+                                targetVoxels.push({ x, z, layer });
+                            }
+                        }
+                    } else {
+                        for (let x = -radius; x <= radius; x += 0.3) {
+                            targetVoxels.push({ x, z: -radius, layer });
+                            targetVoxels.push({ x, z: radius, layer });
+                        }
+                        for (let z = -radius; z <= radius; z += 0.3) {
+                            targetVoxels.push({ x: -radius, z, layer });
+                            targetVoxels.push({ x: radius, z, layer });
+                        }
+                    }
+                }
+            } else if (shape.name.includes('Cylinder')) {
+                for (let layer = 0; layer < layers; layer++) {
+                    for (let angle = 0; angle < Math.PI * 2; angle += 0.2) {
+                        if (type === 'solid') {
+                            for (let r = 0; r <= radius; r += 0.3) {
+                                targetVoxels.push({ x: Math.cos(angle) * r, z: Math.sin(angle) * r, layer });
+                            }
+                        } else {
+                            targetVoxels.push({ x: Math.cos(angle) * radius, z: Math.sin(angle) * radius, layer });
+                        }
+                    }
+                }
+            } else if (shape.name.includes('Cone')) {
+                for (let layer = 0; layer < layers; layer++) {
+                    const r = radius * (1 - layer / layers);
+                    for (let angle = 0; angle < Math.PI * 2; angle += 0.2) {
+                        if (type === 'solid') {
+                            for (let rad = 0; rad <= r; rad += 0.3) {
+                                targetVoxels.push({ x: Math.cos(angle) * rad, z: Math.sin(angle) * rad, layer });
+                            }
+                        } else {
+                            targetVoxels.push({ x: Math.cos(angle) * r, z: Math.sin(angle) * r, layer });
+                        }
+                    }
+                }
+            } else if (shape.name.includes('Sphere')) {
+                for (let layer = 0; layer < layers; layer++) {
+                    const t = layer / (layers - 1);
+                    const angle = Math.PI * t;
+                    const r = Math.sin(angle) * radius;
+                    
+                    for (let a = 0; a < Math.PI * 2; a += 0.2) {
+                        if (type === 'solid') {
+                            for (let rad = 0; rad <= r; rad += 0.3) {
+                                targetVoxels.push({ x: Math.cos(a) * rad, z: Math.sin(a) * rad, layer });
+                            }
+                        } else {
+                            targetVoxels.push({ x: Math.cos(a) * r, z: Math.sin(a) * r, layer });
+                        }
+                    }
+                }
+            }
+        }
+        
+        function calculateMatch() {
+            if (gameMode === 'free') return null;
+            
+            let userVoxels = [];
+            layers.forEach((layer, idx) => {
+                layer.forEach(point => {
+                    userVoxels.push({ x: point.x, z: point.z, layer: idx });
+                });
+            });
+            
+            if (userVoxels.length === 0 || targetVoxels.length === 0) return 0;
+            
+            let matches = 0;
+            const threshold = gameMode === '2d' ? 0.4 : 0.5;
+            
+            targetVoxels.forEach(target => {
+                const found = userVoxels.some(user => {
+                    const dx = user.x - target.x;
+                    const dz = user.z - target.z;
+                    const layerMatch = gameMode === '2d' || Math.abs((user.layer || 0) - (target.layer || 0)) <= 1;
+                    return Math.sqrt(dx * dx + dz * dz) < threshold && layerMatch;
+                });
+                if (found) matches++;
+            });
+            
+            const rawPercent = (matches / targetVoxels.length) * 100;
+            return Math.round(Math.min(100, rawPercent * 1.8));
+        }
+        
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x606060, 1);
+        scene.add(ambientLight);
+        
+        const mainLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        mainLight.position.set(10, 20, 10);
+        mainLight.castShadow = true;
+        mainLight.shadow.camera.left = -15;
+        mainLight.shadow.camera.right = 15;
+        mainLight.shadow.camera.top = 15;
+        mainLight.shadow.camera.bottom = -15;
+        scene.add(mainLight);
+        
+        const fillLight = new THREE.DirectionalLight(0x8888ff, 0.3);
+        fillLight.position.set(-10, 10, -10);
+        scene.add(fillLight);
+        
+        const showcaseLight1 = new THREE.SpotLight(0xffffff, 0);
+        showcaseLight1.position.set(10, 10, 10);
+        showcaseLight1.angle = Math.PI / 6;
+        scene.add(showcaseLight1);
+        
+        const showcaseLight2 = new THREE.SpotLight(0xffffff, 0);
+        showcaseLight2.position.set(-10, 10, -10);
+        showcaseLight2.angle = Math.PI / 6;
+        scene.add(showcaseLight2);
+        
+        const showcaseLight3 = new THREE.PointLight(0xffffff, 0, 30);
+        showcaseLight3.position.set(0, 15, 0);
+        scene.add(showcaseLight3);
+        
+        // Game state
+        let layers = [];
+        let currentLayer = 0;
+        let gameState = 'spreading';
+        let animationProgress = 0;
+        let isDrawing = false;
+        let layerThickness = 0.12;
+        const buildSurfaceY = 0.5;
+        let laserWidth = 2.0;
+        let laserPower = 100;
+        
+        // Joystick state
+        let laserFiring = false;
+        let laserPosition = { x: 0, z: 0 };
+        let joystickActive = false;
+        let joystickDelta = { x: 0, z: 0 };
+        
+        const machineComponents = new THREE.Group();
+        scene.add(machineComponents);
+        
+        const chamberSize = 10;
+        
+        // Build chamber
+        const chamberGeometry = new THREE.BoxGeometry(chamberSize, 0.5, chamberSize);
+        const chamberMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.8, roughness: 0.2 });
+        const chamber = new THREE.Mesh(chamberGeometry, chamberMaterial);
+        chamber.position.y = -5;
+        chamber.receiveShadow = true;
+        machineComponents.add(chamber);
+        
+        // Chamber walls
+        const wallMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x2a2a2a, metalness: 0.6, roughness: 0.4, transparent: true, opacity: 0.3, side: THREE.DoubleSide
+        });
+        
+        const wallGeometry = new THREE.BoxGeometry(0.2, 8, chamberSize);
+        const wallLeft = new THREE.Mesh(wallGeometry, wallMaterial);
+        wallLeft.position.set(-chamberSize/2, 0, 0);
+        machineComponents.add(wallLeft);
+        
+        const wallRight = new THREE.Mesh(wallGeometry, wallMaterial);
+        wallRight.position.set(chamberSize/2, 0, 0);
+        machineComponents.add(wallRight);
+        
+        const wallBack = new THREE.Mesh(new THREE.BoxGeometry(chamberSize, 8, 0.2), wallMaterial);
+        wallBack.position.set(0, 0, -chamberSize/2);
+        machineComponents.add(wallBack);
+        
+        const wallFront = new THREE.Mesh(new THREE.BoxGeometry(chamberSize, 8, 0.2), wallMaterial);
+        wallFront.position.set(0, 0, chamberSize/2);
+        machineComponents.add(wallFront);
+        
+        // Build platform
+        const platformGroup = new THREE.Group();
+        const platformGeometry = new THREE.BoxGeometry(chamberSize - 1, 0.3, chamberSize - 1);
+        const platformMaterial = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.9, roughness: 0.1 });
+        const platform = new THREE.Mesh(platformGeometry, platformMaterial);
+        platform.position.y = -0.15;
+        platform.receiveShadow = true;
+        platform.castShadow = true;
+        platformGroup.add(platform);
+        scene.add(platformGroup);
+        platformGroup.position.y = buildSurfaceY;
+        
+        const gridHelper = new THREE.GridHelper(chamberSize - 1, 10, 0x666666, 0x333333);
+        gridHelper.position.y = buildSurfaceY;
+        machineComponents.add(gridHelper);
+        
+        function createTextSprite(text, color = '#ffffff', width = 2, height = 1, fontSize = 120) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 2048;
+            canvas.height = 1024;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = color;
+            ctx.font = `bold ${fontSize}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            const lines = text.split('\n');
+            const lineHeight = fontSize * 1.2;
+            const startY = (1024 - (lines.length - 1) * lineHeight) / 2;
+            lines.forEach((line, i) => ctx.fillText(line, 1024, startY + i * lineHeight));
+            
+            const texture = new THREE.Texture(canvas);
+            texture.needsUpdate = true;
+            
+            const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide });
+            const geometry = new THREE.PlaneGeometry(width, height);
+            return new THREE.Mesh(geometry, material);
+        }
+        
+        // Coordinate labels
+        const xAxisGroup = new THREE.Group();
+        for (let i = -4; i <= 4; i++) {
+            const label = createTextSprite(i.toString(), '#00ffff', 5, 2, 300);
+            label.position.set(i * ((chamberSize - 1) / 10), buildSurfaceY - 0.3, (chamberSize / 2) + 1.5);
+            label.rotation.x = -Math.PI / 2;
+            xAxisGroup.add(label);
+        }
+        machineComponents.add(xAxisGroup);
+        
+        const yAxisGroup = new THREE.Group();
+        for (let i = -4; i <= 4; i++) {
+            const label = createTextSprite(i.toString(), '#ffff00', 5, 2, 300);
+            label.position.set((chamberSize / 2) + 1.5, buildSurfaceY - 0.3, i * ((chamberSize - 1) / 10));
+            label.rotation.x = -Math.PI / 2;
+            label.rotation.z = Math.PI / 2;
+            yAxisGroup.add(label);
+        }
+        machineComponents.add(yAxisGroup);
+        
+        // Axis labels
+        const xLabel = createTextSprite('X', '#00ffff', 5, 2, 350);
+        xLabel.position.set((chamberSize / 2) - 5, buildSurfaceY - 0.3, (chamberSize / 2) + 2.5);
+        xLabel.rotation.x = -Math.PI / 2;
+        machineComponents.add(xLabel);
+        
+        const yLabel = createTextSprite('Y', '#ffff00', 5, 2, 350);
+        yLabel.position.set((chamberSize / 2) + 2.5, buildSurfaceY - 0.3, -(chamberSize / 2) + 5);
+        yLabel.rotation.x = -Math.PI / 2;
+        yLabel.rotation.z = Math.PI / 2;
+        machineComponents.add(yLabel);
+        
+        // Component labels
+        const powderStockLabel = createTextSprite('POWDER', '#ff9900', 5, 3, 180);
+        powderStockLabel.position.set(-chamberSize/2 - 1.55, 4.2, 0);
+        powderStockLabel.rotation.x = -Math.PI / 2;
+        powderStockLabel.rotation.z = Math.PI / 2;
+        machineComponents.add(powderStockLabel);
+        
+        // Powder stock
+        const powderStockGeometry = new THREE.BoxGeometry(2, 4, chamberSize - 1);
+        const powderStockMaterial = new THREE.MeshStandardMaterial({ color: 0x8b7355, roughness: 0.9 });
+        const powderStock = new THREE.Mesh(powderStockGeometry, powderStockMaterial);
+        powderStock.position.set(-chamberSize/2 - 1.5, 2, 0);
+        machineComponents.add(powderStock);
+        
+        // Recoater
+        const recoaterGroup = new THREE.Group();
+        const recoaterBody = new THREE.Mesh(
+            new THREE.BoxGeometry(0.3, 0.5, chamberSize - 1),
+            new THREE.MeshStandardMaterial({ color: 0x666666, metalness: 0.7, roughness: 0.3 })
+        );
+        const recoaterBlade = new THREE.Mesh(
+            new THREE.BoxGeometry(0.1, 0.8, chamberSize - 1),
+            new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.8, roughness: 0.2 })
+        );
+        recoaterBlade.position.y = -0.4;
+        recoaterGroup.add(recoaterBody);
+        recoaterGroup.add(recoaterBlade);
+        recoaterGroup.position.set(-chamberSize/2 - 1, buildSurfaceY, 0);
+        machineComponents.add(recoaterGroup);
+        
+        // Powder particles
+        const powderParticles = [];
+        
+        function createPowderParticles() {
+            powderParticles.forEach(p => scene.remove(p));
+            powderParticles.length = 0;
+            
+            const particleGeometry = new THREE.SphereGeometry(0.05, 4, 4);
+            const particleMaterial = new THREE.MeshStandardMaterial({ color: 0xa89070, roughness: 1 });
+            
+            for (let i = 0; i < 50; i++) {
+                const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+                particle.position.set(
+                    recoaterGroup.position.x,
+                    buildSurfaceY + Math.random() * 0.3,
+                    (Math.random() - 0.5) * (chamberSize - 1)
+                );
+                particle.velocity = {
+                    x: 0.05 + Math.random() * 0.05,
+                    y: -0.01 - Math.random() * 0.02,
+                    z: (Math.random() - 0.5) * 0.02
+                };
+                scene.add(particle);
+                powderParticles.push(particle);
+            }
+        }
+        
+        function updatePowderParticles() {
+            powderParticles.forEach(particle => {
+                particle.position.x += particle.velocity.x;
+                particle.position.y += particle.velocity.y;
+                particle.position.z += particle.velocity.z;
+                particle.velocity.y -= 0.001;
+                
+                if (particle.position.x > chamberSize/2 || particle.position.y < buildSurfaceY - 0.5) {
+                    particle.position.set(
+                        recoaterGroup.position.x,
+                        buildSurfaceY + Math.random() * 0.3,
+                        (Math.random() - 0.5) * (chamberSize - 1)
+                    );
+                    particle.velocity = {
+                        x: 0.05 + Math.random() * 0.05,
+                        y: -0.01 - Math.random() * 0.02,
+                        z: (Math.random() - 0.5) * 0.02
+                    };
+                }
+            });
+        }
+        
+        // Powder layer
+        let powderLayer = null;
+        
+        function createPowderLayer() {
+            if (powderLayer) scene.remove(powderLayer);
+            
+            const powderGeometry = new THREE.PlaneGeometry(chamberSize - 1, chamberSize - 1);
+            const powderMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xa89070, roughness: 1, transparent: true, opacity: 0.85, side: THREE.DoubleSide
+            });
+            powderLayer = new THREE.Mesh(powderGeometry, powderMaterial);
+            powderLayer.rotation.x = -Math.PI / 2;
+            powderLayer.position.y = buildSurfaceY + 0.01;
+            powderLayer.receiveShadow = true;
+            scene.add(powderLayer);
+        }
+        
+        // Ghost layer
+        let ghostLayer = null;
+        
+        function updateGhostLayer() {
+            if (ghostLayer) {
+                platformGroup.remove(ghostLayer);
+                ghostLayer = null;
+            }
+            
+            if (currentLayer > 0 && gameState === 'drawing') {
+                ghostLayer = new THREE.Group();
+                
+                const ghostMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0x00ff00, metalness: 0.5, roughness: 0.5, transparent: true, opacity: 0.4, emissive: 0x00ff00, emissiveIntensity: 0.3
+                });
+                
+                const prevLayerIndex = currentLayer - 1;
+                if (layers[prevLayerIndex]) {
+                    layers[prevLayerIndex].forEach(point => {
+                        const voxelGeometry = new THREE.BoxGeometry(0.15, 0.15, 0.15);
+                        const voxel = new THREE.Mesh(voxelGeometry, ghostMaterial);
+                        const localY = (prevLayerIndex * layerThickness) + 0.08;
+                        voxel.position.set(point.x, localY, point.z);
+                        ghostLayer.add(voxel);
+                    });
+                }
+                
+                platformGroup.add(ghostLayer);
+            }
+        }
+        
+        const metalMaterial = new THREE.MeshStandardMaterial({ color: 0xc0c0c0, metalness: 0.9, roughness: 0.1 });
+        const voxelSize = 0.15;
+        
+        function addVoxel(x, z) {
+            const baseRadius = (laserWidth / 10) * 0.5;
+            const powerFactor = laserPower / 100;
+            const voxelHeight = voxelSize * (0.8 + powerFactor * 0.4);
+            
+            // Adjust pattern based on laser shape
+            let pattern = [];
+            const numVoxels = Math.ceil(baseRadius / (voxelSize * 0.7));
+            
+            for (let i = -numVoxels; i <= numVoxels; i++) {
+                for (let j = -numVoxels; j <= numVoxels; j++) {
+                    let offsetX = i * voxelSize * 0.7;
+                    let offsetZ = j * voxelSize * 0.7;
+                    const distance = Math.sqrt(offsetX * offsetX + offsetZ * offsetZ);
+                    
+                    let shouldAdd = false;
+                    
+                    switch(laserShape) {
+                        case 'gaussian':
+                            // Standard circular with falloff
+                            if (distance <= baseRadius) shouldAdd = true;
+                            break;
+                        case 'tophat':
+                            // Sharp circular cutoff
+                            if (distance <= baseRadius * 0.9) shouldAdd = true;
+                            break;
+                        case 'doughnut':
+                            // Ring pattern - thin ring with hollow center
+                            const innerRadius = baseRadius * 0.55;
+                            const outerRadius = baseRadius * 1.1;
+                            if (distance >= innerRadius && distance <= outerRadius) shouldAdd = true;
+                            break;
+                        case 'elliptical':
+                            // Ellipse (wider in X)
+                            const ellipseX = offsetX / (baseRadius * 1.5);
+                            const ellipseZ = offsetZ / (baseRadius * 0.7);
+                            if (ellipseX * ellipseX + ellipseZ * ellipseZ <= 1) shouldAdd = true;
+                            break;
+                    }
+                    
+                    if (shouldAdd) {
+                        pattern.push({ offsetX, offsetZ });
+                    }
+                }
+            }
+            
+            pattern.forEach(p => {
+                const voxelGeometry = new THREE.BoxGeometry(voxelSize, voxelHeight, voxelSize);
+                const voxel = new THREE.Mesh(voxelGeometry, metalMaterial);
+                
+                const baseY = (currentLayer * layerThickness) + voxelHeight / 2;
+                const penetration = (powerFactor - 1) * layerThickness * 0.5;
+                const localY = baseY + penetration;
+                
+                voxel.position.set(x + p.offsetX, localY, z + p.offsetZ);
+                voxel.castShadow = true;
+                voxel.receiveShadow = true;
+                
+                platformGroup.add(voxel);
+                
+                const key = `${(x + p.offsetX).toFixed(2)},${(z + p.offsetZ).toFixed(2)}`;
+                if (!layers[currentLayer].find(pt => `${pt.x.toFixed(2)},${pt.z.toFixed(2)}` === key)) {
+                    layers[currentLayer].push({ x: x + p.offsetX, z: z + p.offsetZ });
+                }
+            });
+        }
+        
+        // Laser beam
+        let laserBeam = null;
+        let laserLight = null;
+        
+        function createLaserBeam(x, z) {
+            if (laserBeam) scene.remove(laserBeam);
+            if (laserLight) scene.remove(laserLight);
+            
+            const beamRadius = 0.03 + (laserWidth - 1) * 0.01;
+            const beamGeometry = new THREE.CylinderGeometry(beamRadius, beamRadius, 10, 8);
+            const beamMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0xff0000, transparent: true, opacity: 0.5 + (laserPower / 200) * 0.3
+            });
+            laserBeam = new THREE.Mesh(beamGeometry, beamMaterial);
+            laserBeam.position.set(x, buildSurfaceY + 5, z);
+            scene.add(laserBeam);
+            
+            const lightIntensity = 1.5 + (laserWidth - 1) * 0.3 + (laserPower / 100) * 0.5;
+            laserLight = new THREE.PointLight(0xff0000, lightIntensity, 5);
+            laserLight.position.set(x, buildSurfaceY + 0.1, z);
+            scene.add(laserLight);
+            
+            const glowSize = 0.2 + (laserWidth - 1) * 0.1 + (laserPower / 200) * 0.1;
+            const glowGeometry = new THREE.SphereGeometry(glowSize, 16, 16);
+            const glowMaterial = new THREE.MeshBasicMaterial({ color: 0xff4444, transparent: true, opacity: 0.5 + (laserPower / 200) * 0.3 });
+            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+            glow.position.set(x, buildSurfaceY + 0.1, z);
+            scene.add(glow);
+            setTimeout(() => scene.remove(glow), 100);
+        }
+        
+        function removeLaserBeam() {
+            if (laserBeam) { scene.remove(laserBeam); laserBeam = null; }
+            if (laserLight) { scene.remove(laserLight); laserLight = null; }
+        }
+        
+        // Laser preview marker
+        let previewMarker = null;
+        
+        function createPreviewMarker() {
+            if (previewMarker) scene.remove(previewMarker);
+            
+            const markerGeometry = new THREE.RingGeometry(0.15, 0.2, 32);
+            const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.8, side: THREE.DoubleSide });
+            previewMarker = new THREE.Mesh(markerGeometry, markerMaterial);
+            previewMarker.rotation.x = -Math.PI / 2;
+            previewMarker.position.y = buildSurfaceY + 0.02;
+            previewMarker.visible = false;
+            scene.add(previewMarker);
+        }
+        
+        function updatePreviewMarker(x, z) {
+            if (previewMarker && gameState === 'drawing' && !laserFiring) {
+                previewMarker.position.x = x;
+                previewMarker.position.z = z;
+                previewMarker.visible = true;
+            } else if (previewMarker) {
+                previewMarker.visible = false;
+            }
+        }
+        
+        createPreviewMarker();
+        
+        // UI Updates
+        function updateCoordinateDisplay(x, z) {
+            document.getElementById('coordX').textContent = x.toFixed(2);
+            document.getElementById('coordY').textContent = z.toFixed(2);
+        }
+        
+        function updateLaserStatus(status) {
+            const el = document.getElementById('laserStatus');
+            el.textContent = status;
+            el.classList.remove('firing', 'ready', 'wait');
+            
+            if (status === 'FIRING' || status === 'ARMED') {
+                el.classList.add('firing');
+            } else if (status === 'READY' || status === 'DONE') {
+                el.classList.add('ready');
+            } else {
+                el.classList.add('wait');
+            }
+        }
+        
+        function updatePointerStatus(status) {
+            const indicator = document.getElementById('pointerIndicator');
+            const statusText = document.getElementById('pointerStatusText');
+            indicator.classList.remove('active', 'firing');
+            
+            if (status === 'firing') {
+                indicator.classList.add('firing');
+                statusText.textContent = 'Firing';
+            } else if (status === 'active') {
+                indicator.classList.add('active');
+                statusText.textContent = 'Active';
+            } else {
+                statusText.textContent = 'Ready';
+            }
+        }
+        
+        // Slider controls
+        document.getElementById('laserWidth').addEventListener('input', (e) => {
+            laserWidth = parseFloat(e.target.value);
+            document.getElementById('laserWidthValue').textContent = laserWidth.toFixed(1);
+        });
+        
+        document.getElementById('laserPower').addEventListener('input', (e) => {
+            laserPower = parseInt(e.target.value);
+            document.getElementById('laserPowerValue').textContent = laserPower;
+        });
+        
+        document.getElementById('layerThicknessSlider').addEventListener('input', (e) => {
+            layerThickness = parseFloat(e.target.value);
+            document.getElementById('layerThicknessValue').textContent = layerThickness.toFixed(2);
+        });
+        
+        // Laser shape selector
+        document.querySelectorAll('.shape-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.shape-option').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                laserShape = btn.dataset.shape;
+            });
+        });
+        
+        // Visual Joystick
+        const joystickContainer = document.getElementById('joystickContainer');
+        const joystickHandle = document.getElementById('joystickHandle');
+        
+        function handleJoystickStart(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            joystickActive = true;
+            joystickHandle.style.transition = 'none';
+            handleJoystickMove(e);
+        }
+        
+        function handleJoystickMove(e) {
+            if (!joystickActive) return;
+            e.preventDefault();
+            
+            const rect = joystickContainer.getBoundingClientRect();
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            let clientX, clientY;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            
+            let deltaX = clientX - rect.left - centerX;
+            let deltaY = clientY - rect.top - centerY;
+            
+            const maxDistance = rect.width / 2 - 20;
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            
+            if (distance > maxDistance) {
+                deltaX = (deltaX / distance) * maxDistance;
+                deltaY = (deltaY / distance) * maxDistance;
+            }
+            
+            joystickHandle.style.left = `calc(50% + ${deltaX}px)`;
+            joystickHandle.style.top = `calc(50% + ${deltaY}px)`;
+            
+            joystickDelta.x = deltaX / maxDistance;
+            joystickDelta.z = deltaY / maxDistance;
+        }
+        
+        function handleJoystickEnd(e) {
+            if (!joystickActive) return;
+            e.preventDefault();
+            joystickActive = false;
+            joystickHandle.style.transition = 'all 0.2s';
+            joystickHandle.style.left = '50%';
+            joystickHandle.style.top = '50%';
+            joystickDelta = { x: 0, z: 0 };
+        }
+        
+        joystickContainer.addEventListener('mousedown', handleJoystickStart);
+        joystickContainer.addEventListener('touchstart', handleJoystickStart, { passive: false });
+        document.addEventListener('mousemove', handleJoystickMove);
+        document.addEventListener('touchmove', handleJoystickMove, { passive: false });
+        document.addEventListener('mouseup', handleJoystickEnd);
+        document.addEventListener('touchend', handleJoystickEnd);
+        
+        // Joystick animation loop
+        function updateJoystick() {
+            if (gameState === 'drawing') {
+                const speed = 0.08;
+                const maxPos = (chamberSize - 1) / 2;
+                
+                if (joystickDelta.x !== 0 || joystickDelta.z !== 0) {
+                    laserPosition.x += joystickDelta.x * speed;
+                    laserPosition.z += joystickDelta.z * speed;
+                    
+                    laserPosition.x = Math.max(-maxPos, Math.min(maxPos, laserPosition.x));
+                    laserPosition.z = Math.max(-maxPos, Math.min(maxPos, laserPosition.z));
+                    
+                    updateCoordinateDisplay(laserPosition.x, laserPosition.z);
+                    updatePreviewMarker(laserPosition.x, laserPosition.z);
+                    
+                    if (laserFiring) {
+                        createLaserBeam(laserPosition.x, laserPosition.z);
+                        addVoxel(laserPosition.x, laserPosition.z);
+                        updateLaserStatus('FIRING');
+                        updatePointerStatus('firing');
+                        joystickHandle.classList.add('active');
+                    } else {
+                        updatePointerStatus('active');
+                    }
+                }
+            }
+            
+            requestAnimationFrame(updateJoystick);
+        }
+        
+        updateJoystick();
+        
+        // Laser toggle button
+        const laserToggleBtn = document.getElementById('laserToggleBtn');
+        
+        laserToggleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (gameState !== 'drawing') return;
+            
+            laserFiring = !laserFiring;
+            
+            if (laserFiring) {
+                laserToggleBtn.classList.add('firing');
+                updateLaserStatus('ARMED');
+                if (previewMarker) previewMarker.visible = false;
+            } else {
+                laserToggleBtn.classList.remove('firing');
+                joystickHandle.classList.remove('active');
+                removeLaserBeam();
+                updateLaserStatus('READY');
+                updatePointerStatus('active');
+            }
+        });
+        
+        // Game mode selection
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                gameMode = btn.dataset.mode;
+                
+                const preview = document.getElementById('targetPreview');
+                const shapeChoice = document.getElementById('shapeChoice');
+                const shapeChoice3D = document.getElementById('shapeChoice3D');
+                const targetDisplay = document.getElementById('targetDisplay');
+                const matchResult = document.getElementById('matchResult');
+                
+                matchResult.innerHTML = '';
+                
+                if (gameMode === 'free') {
+                    preview.style.display = 'none';
+                    targetShape = null;
+                    targetVoxels = [];
+                    document.getElementById('statusMessage').textContent = 'Free drawing mode - create anything!';
+                } else if (gameMode === '2d') {
+                    preview.style.display = 'block';
+                    shapeChoice.style.display = 'flex';
+                    shapeChoice3D.style.display = 'none';
+                    targetDisplay.style.display = 'none';
+                    document.getElementById('statusMessage').textContent = 'Choose Letters/Numbers or Symbols!';
+                } else if (gameMode === '3d') {
+                    preview.style.display = 'block';
+                    shapeChoice.style.display = 'none';
+                    shapeChoice3D.style.display = 'flex';
+                    targetDisplay.style.display = 'none';
+                    document.getElementById('statusMessage').textContent = 'Choose Solid or Frame shape!';
+                }
+            });
+        });
+        
+        // Shape choice handlers
+        document.querySelectorAll('.shape-choice-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const type = btn.dataset.type;
+                
+                if (type === 'alphanumeric' || type === 'emoji') {
+                    generate2DShape(type);
+                    document.getElementById('statusMessage').textContent = 'Match the shape!';
+                    document.getElementById('reset').click();
+                } else if (type === 'solid' || type === 'frame') {
+                    generate3DShape(type);
+                    document.getElementById('statusMessage').textContent = 'Build the 3D shape!';
+                    document.getElementById('reset').click();
+                }
+            });
+        });
+        
+        // Camera controls
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let cameraAngle = { theta: Math.PI / 4, phi: Math.PI / 4 };
+        let cameraDistance = 22;
+        const minZoom = 12;
+        const maxZoom = 40;
+        
+        document.getElementById('zoomIn').addEventListener('click', (e) => {
+            e.preventDefault();
+            cameraDistance = Math.max(minZoom, cameraDistance - 2);
+            updateCamera();
+        });
+        
+        document.getElementById('zoomOut').addEventListener('click', (e) => {
+            e.preventDefault();
+            cameraDistance = Math.min(maxZoom, cameraDistance + 2);
+            updateCamera();
+        });
+        
+        document.getElementById('rotateLeft').addEventListener('click', (e) => {
+            e.preventDefault();
+            cameraAngle.theta += 0.2;
+            updateCamera();
+        });
+        
+        document.getElementById('rotateRight').addEventListener('click', (e) => {
+            e.preventDefault();
+            cameraAngle.theta -= 0.2;
+            updateCamera();
+        });
+        
+        document.getElementById('resetCamera').addEventListener('click', (e) => {
+            e.preventDefault();
+            cameraAngle = { theta: Math.PI / 4, phi: Math.PI / 4 };
+            cameraDistance = 22;
+            updateCamera();
+        });
+        
+        // Touch camera controls
+        let touchStartDistance = 0;
+        let touchStartAngle = 0;
+        
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                touchStartDistance = Math.sqrt(dx * dx + dy * dy);
+                touchStartAngle = Math.atan2(dy, dx);
+                isDragging = true;
+            } else if (e.touches.length === 1 && gameState === 'drawing') {
+                isDrawing = true;
+                handleTouchDrawing(e);
+            }
+        }, { passive: false });
+        
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 2 && isDragging) {
+                e.preventDefault();
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                const currentDistance = Math.sqrt(dx * dx + dy * dy);
+                const currentAngle = Math.atan2(dy, dx);
+                
+                const zoomDelta = (touchStartDistance - currentDistance) * 0.05;
+                cameraDistance = Math.max(minZoom, Math.min(maxZoom, cameraDistance + zoomDelta));
+                touchStartDistance = currentDistance;
+                
+                const angleDelta = currentAngle - touchStartAngle;
+                cameraAngle.theta -= angleDelta;
+                touchStartAngle = currentAngle;
+                
+                updateCamera();
+            } else if (e.touches.length === 1 && isDrawing && gameState === 'drawing') {
+                e.preventDefault();
+                handleTouchDrawing(e);
+            }
+        }, { passive: false });
+        
+        canvas.addEventListener('touchend', (e) => {
+            if (e.touches.length < 2) isDragging = false;
+            if (e.touches.length === 0) {
+                isDrawing = false;
+                removeLaserBeam();
+                document.getElementById('crosshair').style.display = 'none';
+            }
+        });
+        
+        function handleTouchDrawing(e) {
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            
+            const crosshair = document.getElementById('crosshair');
+            crosshair.style.left = touch.clientX - rect.left + 'px';
+            crosshair.style.top = touch.clientY - rect.top + 'px';
+            crosshair.style.display = 'block';
+            
+            mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+            
+            raycaster.setFromCamera(mouse, camera);
+            
+            if (powderLayer) {
+                const intersects = raycaster.intersectObject(powderLayer);
+                if (intersects.length > 0) {
+                    const point = intersects[0].point;
+                    createLaserBeam(point.x, point.z);
+                    addVoxel(point.x, point.z);
+                    updateCoordinateDisplay(point.x, point.z);
+                    updateLaserStatus('FIRING');
+                    updatePointerStatus('firing');
+                }
+            }
+        }
+        
+        // Mouse controls
+        canvas.addEventListener('mousedown', (e) => {
+            if (e.button === 2 || e.ctrlKey) {
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            } else if (gameState === 'drawing') {
+                isDrawing = true;
+                handleDrawing(e);
+            }
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+                
+                cameraAngle.theta -= deltaX * 0.01;
+                cameraAngle.phi -= deltaY * 0.01;
+                cameraAngle.phi = Math.max(0.1, Math.min(Math.PI - 0.1, cameraAngle.phi));
+                
+                updateCamera();
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            } else if (isDrawing && gameState === 'drawing') {
+                handleDrawing(e);
+            }
+            
+            if (gameState === 'drawing') {
+                const crosshair = document.getElementById('crosshair');
+                crosshair.style.left = e.clientX - canvas.getBoundingClientRect().left + 'px';
+                crosshair.style.top = e.clientY - canvas.getBoundingClientRect().top + 'px';
+                crosshair.style.display = 'block';
+                
+                const rect = canvas.getBoundingClientRect();
+                mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+                
+                raycaster.setFromCamera(mouse, camera);
+                
+                if (powderLayer) {
+                    const intersects = raycaster.intersectObject(powderLayer);
+                    if (intersects.length > 0) {
+                        const point = intersects[0].point;
+                        updateCoordinateDisplay(point.x, point.z);
+                        if (!isDrawing) updatePointerStatus('active');
+                    }
+                }
+            }
+        });
+        
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+            isDrawing = false;
+            removeLaserBeam();
+            updatePointerStatus('active');
+        });
+        
+        canvas.addEventListener('mouseleave', () => {
+            isDragging = false;
+            isDrawing = false;
+            removeLaserBeam();
+            document.getElementById('crosshair').style.display = 'none';
+            updatePointerStatus('ready');
+        });
+        
+        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+        
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            cameraDistance += e.deltaY * 0.02;
+            cameraDistance = Math.max(minZoom, Math.min(maxZoom, cameraDistance));
+            updateCamera();
+        }, { passive: false });
+        
+        function updateCamera() {
+            camera.position.x = cameraDistance * Math.sin(cameraAngle.phi) * Math.cos(cameraAngle.theta);
+            camera.position.y = cameraDistance * Math.cos(cameraAngle.phi);
+            camera.position.z = cameraDistance * Math.sin(cameraAngle.phi) * Math.sin(cameraAngle.theta);
+            camera.lookAt(0, 0, 0);
+        }
+        
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        
+        function handleDrawing(e) {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+            
+            raycaster.setFromCamera(mouse, camera);
+            
+            if (powderLayer) {
+                const intersects = raycaster.intersectObject(powderLayer);
+                if (intersects.length > 0) {
+                    const point = intersects[0].point;
+                    createLaserBeam(point.x, point.z);
+                    addVoxel(point.x, point.z);
+                    updateCoordinateDisplay(point.x, point.z);
+                    updateLaserStatus('FIRING');
+                    updatePointerStatus('firing');
+                }
+            }
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (gameState === 'spreading') {
+                animationProgress += 0.015;
+                
+                const startX = -chamberSize/2 - 1;
+                const endX = chamberSize/2 + 1;
+                recoaterGroup.position.x = startX + (endX - startX) * animationProgress;
+                recoaterGroup.position.y = buildSurfaceY;
+                
+                updatePowderParticles();
+                
+                if (animationProgress >= 1) {
+                    animationProgress = 0;
+                    gameState = 'drawing';
+                    createPowderLayer();
+                    updateGhostLayer();
+                    recoaterGroup.position.x = startX;
+                    powderParticles.forEach(p => scene.remove(p));
+                    powderParticles.length = 0;
+                    document.getElementById('statusMessage').textContent = 'Draw your laser path!';
+                    updateLaserStatus('ARMED');
+                }
+            }
+            
+            // Rotate target 3D preview
+            if (target3DMesh && document.getElementById('target3DCanvas').style.display !== 'none') {
+                target3DAngle += 0.01;
+                target3DMesh.rotation.y = target3DAngle;
+                target3DRenderer.render(target3DScene, target3DCamera);
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        layers.push([]);
+        
+        // Action buttons
+        document.getElementById('nextLayer').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (gameState !== 'drawing') return;
+            
+            currentLayer++;
+            layers.push([]);
+            
+            platformGroup.position.y -= layerThickness;
+            gridHelper.position.y = buildSurfaceY;
+            
+            gameState = 'spreading';
+            animationProgress = 0;
+            
+            if (powderLayer) scene.remove(powderLayer);
+            if (ghostLayer) { platformGroup.remove(ghostLayer); ghostLayer = null; }
+            
+            createPowderParticles();
+            
+            document.getElementById('layerCount').textContent = currentLayer + 1;
+            document.getElementById('buildHeight').textContent = ((currentLayer + 1) * layerThickness).toFixed(2) + 'mm';
+            document.getElementById('statusMessage').textContent = 'Spreading powder...';
+            updateLaserStatus('WAIT');
+        });
+        
+        document.getElementById('finishProduct').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (gameState === 'finished') return;
+            
+            gameState = 'finished';
+            
+            if (powderLayer) scene.remove(powderLayer);
+            if (ghostLayer) { platformGroup.remove(ghostLayer); ghostLayer = null; }
+            if (previewMarker) previewMarker.visible = false;
+            
+            machineComponents.visible = false;
+            
+            scene.background = new THREE.Color(0x404050);
+            scene.fog = null;
+            
+            ambientLight.intensity = 2;
+            mainLight.intensity = 1.5;
+            showcaseLight1.intensity = 2;
+            showcaseLight2.intensity = 2;
+            showcaseLight3.intensity = 3;
+            
+            let showcaseAngle = 0;
+            const showcaseInterval = setInterval(() => {
+                showcaseAngle += 0.015;
+                cameraAngle.theta = showcaseAngle;
+                cameraAngle.phi = Math.PI / 3;
+                updateCamera();
+            }, 50);
+            
+            setTimeout(() => clearInterval(showcaseInterval), 10000);
+            
+            document.getElementById('statusMessage').textContent = '✨ Manufacturing complete!';
+            updateLaserStatus('DONE');
+            
+            if (gameMode !== 'free' && targetVoxels.length > 0) {
+                const matchPercent = calculateMatch();
+                const resultDiv = document.getElementById('matchResult');
+                
+                let emoji = '🎉', message = 'Perfect Match!';
+                if (matchPercent >= 90) { emoji = '🎉'; message = 'Excellent!'; }
+                else if (matchPercent >= 75) { emoji = '👍'; message = 'Great Job!'; }
+                else if (matchPercent >= 60) { emoji = '👌'; message = 'Good Effort!'; }
+                else { emoji = '💪'; message = 'Keep Trying!'; }
+                
+                resultDiv.innerHTML = `
+                    <div class="match-result">
+                        ${emoji} Score: ${matchPercent}% ${emoji}<br>
+                        <span style="font-size: 16px;">${message}</span>
+                    </div>
+                `;
+            }
+        });
+        
+        document.getElementById('reset').addEventListener('click', (e) => {
+            e.preventDefault();
+            while(platformGroup.children.length > 1) {
+                platformGroup.remove(platformGroup.children[1]);
+            }
+            
+            layers = [[]];
+            currentLayer = 0;
+            platformGroup.position.y = buildSurfaceY;
+            gameState = 'spreading';
+            animationProgress = 0;
+            
+            laserFiring = false;
+            laserPosition = { x: 0, z: 0 };
+            joystickDelta = { x: 0, z: 0 };
+            laserToggleBtn.classList.remove('firing');
+            joystickHandle.classList.remove('active');
+            
+            if (powderLayer) scene.remove(powderLayer);
+            if (ghostLayer) { platformGroup.remove(ghostLayer); ghostLayer = null; }
+            
+            powderParticles.forEach(p => scene.remove(p));
+            powderParticles.length = 0;
+            
+            machineComponents.visible = true;
+            scene.background = new THREE.Color(0x1a1a2e);
+            scene.fog = new THREE.Fog(0x1a1a2e, 20, 50);
+            
+            ambientLight.intensity = 1;
+            mainLight.intensity = 0.8;
+            showcaseLight1.intensity = 0;
+            showcaseLight2.intensity = 0;
+            showcaseLight3.intensity = 0;
+            
+            gridHelper.position.y = buildSurfaceY;
+            
+            document.getElementById('layerCount').textContent = '1';
+            document.getElementById('buildHeight').textContent = '0.0mm';
+            updateLaserStatus('READY');
+            document.getElementById('coordX').textContent = '0.00';
+            document.getElementById('coordY').textContent = '0.00';
+            updatePointerStatus('ready');
+            
+            document.getElementById('matchResult').innerHTML = '';
+            
+            if (gameMode === 'free') {
+                document.getElementById('statusMessage').textContent = 'Free drawing - create anything!';
+            } else if (gameMode === '2d' && targetVoxels.length > 0) {
+                document.getElementById('statusMessage').textContent = 'Match the 2D shape!';
+            } else if (gameMode === '3d' && targetVoxels.length > 0) {
+                document.getElementById('statusMessage').textContent = 'Build the 3D shape!';
+            } else {
+                document.getElementById('statusMessage').textContent = 'Choose a shape to start!';
+            }
+            
+            cameraAngle = { theta: Math.PI / 4, phi: Math.PI / 4 };
+            cameraDistance = 22;
+            updateCamera();
+        });
+        
+        // Instructions toggle
+        document.getElementById('instructionsToggle').addEventListener('click', () => {
+            const content = document.getElementById('instructionsContent');
+            const arrow = document.getElementById('toggleArrow');
+            content.classList.toggle('show');
+            arrow.textContent = content.classList.contains('show') ? '▲' : '▼';
+        });
+        
+        window.addEventListener('resize', () => {
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        });
+        
+        animate();
+    </script>
+</body>
+</html>

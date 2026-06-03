@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.LaserForge" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#00d4ff</item>
+        <item name="colorPrimaryVariant">#7b2cbf</item>
+        <item name="colorOnPrimary">#000000</item>
+        <item name="colorSecondary">#764ba2</item>
+        <item name="colorSecondaryVariant">#667eea</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="android:windowBackground">@drawable/bg_gradient</item>
+        <item name="android:statusBarColor">@color/bg_start</item>
+        <item name="android:navigationBarColor">@color/bg_end</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+    </style>
+
+    <!--
+        Launcher/splash theme applied to the MAIN/LAUNCHER activity. It uses the
+        AndroidX SplashScreen library which backports the Android 12+ SplashScreen
+        API to API 24+ (our minSdk). The system renders the splash with the
+        background and the splash icon centered, then swaps to Theme.LaserForge
+        once MainActivity calls installSplashScreen() and the first frame is ready.
+    -->
+    <style name="Theme.LaserForge.Launcher" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/bg_start</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo_with_caption</item>
+        <item name="postSplashScreenTheme">@style/Theme.LaserForge</item>
+    </style>
+</resources>

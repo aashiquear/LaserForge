@@ -1,0 +1,765 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:scrollbars="none"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_gradient"
+        android:padding="10dp">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/titleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/title"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:padding="6dp"
+            android:textColor="@color/title_start" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/subtitle"
+            android:textSize="11sp"
+            android:gravity="center"
+            android:alpha="0.7"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="6dp" />
+
+        <!-- Game Mode card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/panel_bg"
+            android:orientation="vertical"
+            android:padding="10dp"
+            android:layout_marginBottom="8dp">
+
+            <LinearLayout
+                android:id="@+id/modeButtons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="8dp">
+
+                <Button
+                    android:id="@+id/modeFreeBtn"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/btn_mode_active"
+                    android:text="@string/mode_free"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:minHeight="40dp" />
+
+                <Button
+                    android:id="@+id/mode2dBtn"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/btn_mode"
+                    android:text="@string/mode_2d"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:minHeight="40dp" />
+
+                <Button
+                    android:id="@+id/mode3dBtn"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:background="@drawable/btn_mode"
+                    android:text="@string/mode_3d"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:minHeight="40dp" />
+            </LinearLayout>
+
+            <!-- 2D shape choice (Letters or Symbols) -->
+            <LinearLayout
+                android:id="@+id/shapeChoice2d"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:visibility="gone"
+                android:layout_marginBottom="6dp">
+
+                <Button
+                    android:id="@+id/btnAlphanumeric"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/btn_shape_option"
+                    android:text="@string/shape_alphanumeric"
+                    android:textColor="@color/text_primary"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:minHeight="36dp" />
+
+                <Button
+                    android:id="@+id/btnEmoji"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:background="@drawable/btn_shape_option"
+                    android:text="@string/shape_emoji"
+                    android:textColor="@color/text_primary"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:minHeight="36dp" />
+            </LinearLayout>
+
+            <!-- 3D shape choice (Solid or Frame) -->
+            <LinearLayout
+                android:id="@+id/shapeChoice3d"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:visibility="gone"
+                android:layout_marginBottom="6dp">
+
+                <Button
+                    android:id="@+id/btnSolid"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/btn_shape_option"
+                    android:text="@string/shape_solid"
+                    android:textColor="@color/text_primary"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:minHeight="36dp" />
+
+                <Button
+                    android:id="@+id/btnFrame"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:background="@drawable/btn_shape_option"
+                    android:text="@string/shape_frame"
+                    android:textColor="@color/text_primary"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:minHeight="36dp" />
+            </LinearLayout>
+
+            <!-- Target display -->
+            <LinearLayout
+                android:id="@+id/targetDisplay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/target_preview_bg"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="10dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/targetLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="6dp"
+                    tools:text="🎯 Target: A | Layers: 1" />
+
+                <!-- 2D target image -->
+                <ImageView
+                    android:id="@+id/target2dImage"
+                    android:layout_width="200dp"
+                    android:layout_height="150dp"
+                    android:background="@drawable/target_canvas_bg"
+                    android:visibility="gone"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="@string/title" />
+
+                <!-- 3D target preview (small GLSurfaceView) -->
+                <com.laserforge.lpbf.ui.TargetPreviewView
+                    android:id="@+id/target3dView"
+                    android:layout_width="200dp"
+                    android:layout_height="150dp"
+                    android:background="@drawable/target_canvas_bg"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Laser Controls card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/panel_bg"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="8dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_laser_width"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="10sp"
+                        android:textStyle="bold" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/laserWidthSlider"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:value="2.0"
+                            android:valueFrom="1"
+                            android:valueTo="5"
+                            android:stepSize="0.5" />
+                        <TextView
+                            android:id="@+id/laserWidthValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="2.0mm"
+                            android:textColor="@color/slider_value"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:minWidth="48dp"
+                            android:gravity="end" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_laser_power"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="10sp"
+                        android:textStyle="bold" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/laserPowerSlider"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:value="100"
+                            android:valueFrom="50"
+                            android:valueTo="200"
+                            android:stepSize="10" />
+                        <TextView
+                            android:id="@+id/laserPowerValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="100W"
+                            android:textColor="@color/slider_value"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:minWidth="48dp"
+                            android:gravity="end" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="6dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="8dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_layer_thickness"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="10sp"
+                        android:textStyle="bold" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/layerThicknessSlider"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:value="0.12"
+                            android:valueFrom="0.05"
+                            android:valueTo="0.30"
+                            android:stepSize="0.01" />
+                        <TextView
+                            android:id="@+id/layerThicknessValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0.12mm"
+                            android:textColor="@color/slider_value"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:minWidth="48dp"
+                            android:gravity="end" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_laser_shape"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="10sp"
+                        android:textStyle="bold" />
+                    <LinearLayout
+                        android:id="@+id/laserShapeOptions"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <Button
+                            android:id="@+id/shapeGaussianBtn"
+                            style="?android:attr/borderlessButtonStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="28dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="2dp"
+                            android:background="@drawable/btn_shape_option_active"
+                            android:text="@string/shape_gaussian"
+                            android:textColor="@color/text_primary"
+                            android:textSize="9sp"
+                            android:minHeight="0dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                        <Button
+                            android:id="@+id/shapeTophatBtn"
+                            style="?android:attr/borderlessButtonStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="28dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="2dp"
+                            android:layout_marginEnd="2dp"
+                            android:background="@drawable/btn_shape_option"
+                            android:text="@string/shape_tophat"
+                            android:textColor="@color/text_primary"
+                            android:textSize="9sp"
+                            android:minHeight="0dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                        <Button
+                            android:id="@+id/shapeDoughnutBtn"
+                            style="?android:attr/borderlessButtonStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="28dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="2dp"
+                            android:layout_marginEnd="2dp"
+                            android:background="@drawable/btn_shape_option"
+                            android:text="@string/shape_doughnut"
+                            android:textColor="@color/text_primary"
+                            android:textSize="9sp"
+                            android:minHeight="0dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                        <Button
+                            android:id="@+id/shapeEllipticalBtn"
+                            style="?android:attr/borderlessButtonStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="28dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/btn_shape_option"
+                            android:text="@string/shape_elliptical"
+                            android:textColor="@color/text_primary"
+                            android:textSize="9sp"
+                            android:minHeight="0dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Status message -->
+        <TextView
+            android:id="@+id/statusMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/status_message_bg"
+            android:padding="10dp"
+            android:textColor="@color/text_primary"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:layout_marginBottom="8dp"
+            android:text="@string/status_default" />
+
+        <!-- Top status bar (X / Y + pointer) -->
+        <com.laserforge.lpbf.ui.CoordinateBarView
+            android:id="@+id/topStatusBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/status_bar_top_bg"
+            android:padding="8dp" />
+
+        <!-- Canvas container with overlay camera controls -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:background="@drawable/canvas_bg">
+
+            <com.laserforge.lpbf.ui.GameView
+                android:id="@+id/gameView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <Button
+                    android:id="@+id/camZoomIn"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/camera_btn"
+                    android:text="+"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    android:contentDescription="@string/cam_zoom_in"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:padding="0dp" />
+
+                <Button
+                    android:id="@+id/camZoomOut"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/camera_btn"
+                    android:text="−"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    android:contentDescription="@string/cam_zoom_out"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:padding="0dp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="4dp">
+                    <Button
+                        android:id="@+id/camRotateLeft"
+                        style="?android:attr/borderlessButtonStyle"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:background="@drawable/camera_btn"
+                        android:text="↺"
+                        android:textColor="@color/text_primary"
+                        android:textSize="14sp"
+                        android:contentDescription="@string/cam_rotate_left"
+                        android:minHeight="0dp"
+                        android:minWidth="0dp"
+                        android:padding="0dp" />
+                    <Button
+                        android:id="@+id/camRotateRight"
+                        style="?android:attr/borderlessButtonStyle"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginStart="4dp"
+                        android:background="@drawable/camera_btn"
+                        android:text="↻"
+                        android:textColor="@color/text_primary"
+                        android:textSize="14sp"
+                        android:contentDescription="@string/cam_rotate_right"
+                        android:minHeight="0dp"
+                        android:minWidth="0dp"
+                        android:padding="0dp" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/camReset"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/camera_btn"
+                    android:text="⌂"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    android:contentDescription="@string/cam_reset"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:padding="0dp" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Bottom status bar (Layer / Height / Laser) -->
+        <com.laserforge.lpbf.ui.CoordinateBarView
+            android:id="@+id/bottomStatusBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/status_bar_bottom_bg"
+            android:padding="8dp" />
+
+        <!-- Control Panel: Joystick + Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/panel_bg"
+            android:orientation="horizontal"
+            android:padding="15dp"
+            android:gravity="center"
+            android:layout_marginTop="8dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <com.laserforge.lpbf.ui.JoystickView
+                    android:id="@+id/joystickView"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp" />
+
+                <Button
+                    android:id="@+id/fireBtn"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:layout_marginStart="15dp"
+                    android:background="@drawable/btn_laser_fire"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:textColor="@color/text_primary"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="0dp"
+                    android:lineSpacingExtra="2dp"
+                    android:text="@string/fire_icon" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="15dp"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <Button
+                    android:id="@+id/nextLayerBtn"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/btn_next_layer"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:minHeight="40dp"
+                    android:text="@string/action_next_layer" />
+
+                <Button
+                    android:id="@+id/finishBtn"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/btn_finish"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:minHeight="40dp"
+                    android:text="@string/action_finish" />
+
+                <Button
+                    android:id="@+id/resetBtn"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/btn_reset"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:minHeight="40dp"
+                    android:text="@string/action_reset" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Touch hint -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/touch_hint"
+            android:textColor="@color/text_primary"
+            android:alpha="0.6"
+            android:textSize="10sp"
+            android:gravity="center"
+            android:paddingTop="8dp" />
+
+        <!-- Match result placeholder -->
+        <FrameLayout
+            android:id="@+id/matchResultContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" />
+
+        <!-- Instructions toggle -->
+        <LinearLayout
+            android:id="@+id/instructionsToggle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/instructions_toggle_bg"
+            android:padding="10dp"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/instructions_label"
+                android:textColor="@color/text_primary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/toggleArrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/instructions_arrow_down"
+                android:textColor="@color/text_primary"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Instructions content -->
+        <LinearLayout
+            android:id="@+id/instructionsContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/instructions_content_bg"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/instructions_h4_modes"
+                android:textColor="@color/instructions_h4"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginTop="6dp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_free" android:textColor="@color/text_primary" android:textSize="11sp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_2d" android:textColor="@color/text_primary" android:textSize="11sp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_3d" android:textColor="@color/text_primary" android:textSize="11sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/instructions_h4_controls"
+                android:textColor="@color/instructions_h4"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginTop="6dp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_draw" android:textColor="@color/text_primary" android:textSize="11sp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_joy" android:textColor="@color/text_primary" android:textSize="11sp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_fire" android:textColor="@color/text_primary" android:textSize="11sp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_cam" android:textColor="@color/text_primary" android:textSize="11sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/instructions_h4_shapes"
+                android:textColor="@color/instructions_h4"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginTop="6dp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_gauss" android:textColor="@color/text_primary" android:textSize="11sp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_tophat" android:textColor="@color/text_primary" android:textSize="11sp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_doughnut" android:textColor="@color/text_primary" android:textSize="11sp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_ellip" android:textColor="@color/text_primary" android:textSize="11sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/instructions_h4_process"
+                android:textColor="@color/instructions_h4"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginTop="6dp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_proc1" android:textColor="@color/text_primary" android:textSize="11sp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_proc2" android:textColor="@color/text_primary" android:textSize="11sp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_proc3" android:textColor="@color/text_primary" android:textSize="11sp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_proc4" android:textColor="@color/text_primary" android:textSize="11sp" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

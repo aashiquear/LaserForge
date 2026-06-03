@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  LaserForge launcher icon foreground.
+  Source SVG: /home/aashiquear/Downloads/laserforge_logo.svg (512x512).
+  Adaptive icon canvas is 108dp with a 72dp safe zone (18dp inset on all sides).
+  We re-author the SVG's inner artwork (pyramid, laser, glow, sparkles, particles)
+  at the 72dp safe-zone scale: factor = 72/512 = 0.140625, then translate 18,18.
+  Gradients in the original are simplified to solid colors; the gradient background
+  lives in ic_launcher_background.xml so the foreground stays crisp at all densities.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!--
+        Coordinate space: 0..108.
+        Original SVG coords -> vector coords: v = svg * 0.140625 + 18.
+        Scale factor 0.140625, translate 18,18 (centers the 72dp artwork).
+        Convenience: round(v*100)/100.
+    -->
+
+    <!-- Build platform (3D effect) -->
+    <path
+        android:fillColor="#333333"
+        android:pathData="M32.13,71.63 L54.00,63.00 L75.88,71.63 L54.00,80.25 Z" />
+    <path
+        android:fillColor="#2A2A2A"
+        android:pathData="M32.13,71.63 L54.00,63.00 L54.00,66.13 L32.13,74.75 Z" />
+    <path
+        android:fillColor="#444444"
+        android:pathData="M75.88,71.63 L54.00,63.00 L54.00,66.13 L75.88,74.75 Z" />
+
+    <!-- Metal layers (printed object - pyramid shape) -->
+    <!-- Layer 6 (largest) -->
+    <path
+        android:fillColor="#D8D8D8"
+        android:pathData="M39.13,70.31 L54.00,64.13 L68.88,70.31 L54.00,76.50 Z" />
+    <!-- Layer 5 -->
+    <path
+        android:fillColor="#C0C0C0"
+        android:pathData="M41.25,68.19 L54.00,62.44 L66.75,68.19 L54.00,73.94 Z" />
+    <!-- Layer 4 -->
+    <path
+        android:fillColor="#E8E8E8"
+        android:pathData="M43.38,66.06 L54.00,60.75 L64.63,66.06 L54.00,71.38 Z" />
+    <!-- Layer 3 -->
+    <path
+        android:fillColor="#A8A8A8"
+        android:pathData="M45.50,63.94 L54.00,59.06 L62.50,63.94 L54.00,68.81 Z" />
+    <!-- Layer 2 -->
+    <path
+        android:fillColor="#E8E8E8"
+        android:pathData="M47.63,61.81 L54.00,57.38 L60.38,61.81 L54.00,66.25 Z" />
+    <!-- Layer 1 (top of pyramid, where laser hits) -->
+    <path
+        android:fillColor="#C0C0C0"
+        android:pathData="M49.75,59.69 L54.00,55.69 L58.25,59.69 L54.00,63.69 Z" />
+
+    <!-- Molten glow at laser impact point -->
+    <path
+        android:fillColor="#FFFF00"
+        android:pathData="M54.00,57.38 m-4.92,-2.81 a4.92,2.81 0 1,0 9.84,0 a4.92,2.81 0 1,0 -9.84,0 Z" />
+
+    <!-- Laser beam (outer red) -->
+    <path
+        android:fillColor="#FF0000"
+        android:pathData="M53.44,55.69 L54.56,55.69 L55.69,29.25 L52.31,29.25 Z" />
+    <!-- Laser beam (inner white-hot core) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.7"
+        android:pathData="M53.72,55.69 L54.28,55.69 L54.56,29.25 L53.44,29.25 Z" />
+
+    <!-- Laser source housing -->
+    <path
+        android:fillColor="#444444"
+        android:pathData="M48.94,26.63 h10.13 a0.84,0.84 0 0 1 0.84,0.84 v2.53 a0.84,0.84 0 0 1 -0.84,0.84 h-10.13 a0.84,0.84 0 0 1 -0.84,-0.84 v-2.53 a0.84,0.84 0 0 1 0.84,-0.84 Z" />
+    <path
+        android:fillColor="#222222"
+        android:pathData="M50.06,27.75 h7.88 v1.97 h-7.88 Z" />
+    <!-- Laser source lens (red glow + white hot center) -->
+    <path
+        android:fillColor="#FF0000"
+        android:fillAlpha="0.8"
+        android:pathData="M54.00,28.75 m-1.13,0 a1.13,1.13 0 1,0 2.25,0 a1.13,1.13 0 1,0 -2.25,0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.9"
+        android:pathData="M54.00,28.75 m-0.56,0 a0.56,0.56 0 1,0 1.13,0 a0.56,0.56 0 1,0 -1.13,0 Z" />
+
+    <!-- Powder bed sides -->
+    <path
+        android:fillColor="#8B7355"
+        android:pathData="M27.88,74.75 L32.13,71.63 L32.13,74.75 L27.88,77.88 Z" />
+    <path
+        android:fillColor="#6B5335"
+        android:pathData="M80.13,74.75 L75.88,71.63 L75.88,74.75 L80.13,77.88 Z" />
+
+    <!-- Accent line at bottom (cyan->purple) -->
+    <path
+        android:fillColor="#00D4FF"
+        android:pathData="M32.13,79.41 h43.75 a0.56,0.56 0 0 1 0.56,0.56 v0 a0.56,0.56 0 0 1 -0.56,0.56 h-43.75 a0.56,0.56 0 0 1 -0.56,-0.56 v0 a0.56,0.56 0 0 1 0.56,-0.56 Z" />
+
+    <!-- Small particles/powder effect -->
+    <path
+        android:fillColor="#A89070"
+        android:fillAlpha="0.6"
+        android:pathData="M36.28,73.94 m-0.42,0 a0.42,0.42 0 1,0 0.84,0 a0.42,0.42 0 1,0 -0.84,0 Z" />
+    <path
+        android:fillColor="#A89070"
+        android:fillAlpha="0.6"
+        android:pathData="M38.41,75.34 m-0.28,0 a0.28,0.28 0 1,0 0.56,0 a0.28,0.28 0 1,0 -0.56,0 Z" />
+    <path
+        android:fillColor="#A89070"
+        android:fillAlpha="0.6"
+        android:pathData="M40.50,74.50 m-0.35,0 a0.35,0.35 0 1,0 0.70,0 a0.35,0.35 0 1,0 -0.70,0 Z" />
+    <path
+        android:fillColor="#A89070"
+        android:fillAlpha="0.6"
+        android:pathData="M67.22,75.06 m-0.28,0 a0.28,0.28 0 1,0 0.56,0 a0.28,0.28 0 1,0 -0.56,0 Z" />
+    <path
+        android:fillColor="#A89070"
+        android:fillAlpha="0.6"
+        android:pathData="M70.00,73.94 m-0.42,0 a0.42,0.42 0 1,0 0.84,0 a0.42,0.42 0 1,0 -0.84,0 Z" />
+    <path
+        android:fillColor="#A89070"
+        android:fillAlpha="0.6"
+        android:pathData="M72.09,75.34 m-0.28,0 a0.28,0.28 0 1,0 0.56,0 a0.28,0.28 0 1,0 -0.56,0 Z" />
+
+    <!-- Sparkle effects near molten area -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.8"
+        android:pathData="M51.75,54.84 m-0.28,0 a0.28,0.28 0 1,0 0.56,0 a0.28,0.28 0 1,0 -0.56,0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.8"
+        android:pathData="M56.72,55.41 m-0.21,0 a0.21,0.21 0 1,0 0.42,0 a0.21,0.21 0 1,0 -0.42,0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.8"
+        android:pathData="M53.16,56.53 m-0.14,0 a0.14,0.14 0 1,0 0.28,0 a0.14,0.14 0 1,0 -0.28,0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.8"
+        android:pathData="M55.69,54.28 m-0.21,0 a0.21,0.21 0 1,0 0.42,0 a0.21,0.21 0 1,0 -0.42,0 Z" />
+</vector>
