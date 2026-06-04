@@ -50,6 +50,7 @@ class GameEngine {
     val chamberSize: Float = 10f
     val buildSurfaceY: Float = 0.5f
     val voxelSize: Float = 0.15f
+    val buildHalfSize: Float = chamberSize / 2f
 
     // Dynamic objects owned by the engine.
     private val particles: MutableList<Particle> = mutableListOf()
@@ -73,12 +74,13 @@ class GameEngine {
     var platformY: Float = buildSurfaceY
         private set
 
-    // Recoater transform (only visible during spreading).
-    var recoaterX: Float = -(chamberSize / 2) - 1f
+    // Recoater transform (only visible during spreading). In the HTML the recoater sweeps
+    // from the powder side (x = -6) toward the build area (x = 2), then jumps back.
+    var recoaterX: Float = -6f
         private set
     val recoaterY: Float get() = buildSurfaceY
-    private val recoaterStartX = -(chamberSize / 2) - 1f
-    private val recoaterEndX = (chamberSize / 2) + 1f
+    private val recoaterStartX = -chamberSize / 2f - 1f
+    private val recoaterEndX = chamberSize / 2f + 1f
 
     // Whether the static machine components (chamber, walls, recoater, stock) are visible.
     var machineComponentsVisible: Boolean = true
@@ -98,7 +100,7 @@ class GameEngine {
     // Preview marker (yellow ring) — visible when in DRAWING and not firing.
     var previewMarkerVisible: Boolean = false
 
-    // Camera reset
+    // Camera reset (matches HTML defaults: theta=π/4, phi=π/4, distance=22)
     var cameraTheta: Float = (Math.PI / 4).toFloat()
     var cameraPhi: Float = (Math.PI / 4).toFloat()
     var cameraDistance: Float = 22f
@@ -277,8 +279,8 @@ class GameEngine {
             val baseY = currentLayer * layerThickness + voxelHeight / 2f
             val penetration = (powerFactor - 1f) * layerThickness * 0.5f
             val localY = baseY + penetration
-            // Apply transform: translate (x+ox, localY, z+oz)
-            MatrixUtil.translate(mesh.transform, x + ox, localY, z + oz)
+            // Voxels sit on the platform surface (HTML: platformGroup at buildSurfaceY).
+            MatrixUtil.translate(mesh.transform, x + ox, buildSurfaceY + localY, z + oz)
             voxels.add(mesh)
 
             // Track in [layers]
@@ -332,6 +334,9 @@ class GameEngine {
             p.y += p.vy
             p.z += p.vz
             p.vy -= 0.001f
+            // Wrap to powder side (recoaterStartX) and respawn at the supply, not at
+            // the far right of the chamber. In the HTML the particles fall on the powder
+            // bed (left side) when the recoater passes by.
             if (p.x > chamberSize / 2 || p.y < buildSurfaceY - 0.5f) {
                 p.x = recoaterStartX
                 p.y = buildSurfaceY + Random.nextFloat() * 0.3f
@@ -353,7 +358,7 @@ class GameEngine {
             val m = MeshBuilder.box(voxelSize, voxelSize, voxelSize)
             m.material = ghostMaterial
             val localY = prevIndex * layerThickness + 0.08f
-            MatrixUtil.translate(m.transform, x, localY, z)
+            MatrixUtil.translate(m.transform, x, buildSurfaceY + localY, z)
             ghostVoxels.add(m)
         }
     }
@@ -505,54 +510,54 @@ class GameEngine {
     fun buildStaticMeshes(): List<Mesh> {
         val out = ArrayList<Mesh>()
 
-        // Chamber floor
+        // Scene layout matches the original HTML:
+        //   - Build platform is centered at origin (0, 0, 0).
+        //   - Powder supply sits on the left at (-chamberSize/2 - 1.5, ...).
+        //   - Recoater sweeps from -chamberSize/2 - 1 to +chamberSize/2 + 1.
+
+        // Chamber floor (kept centered for a tidy frame)
         val chamber = MeshBuilder.box(chamberSize, 0.5f, chamberSize)
         chamber.material = chamberMaterial
         MatrixUtil.translate(chamber.transform, 0f, -5f, 0f)
         out.add(chamber)
 
-        // 4 walls
+        // 4 walls around the build area (centered at origin, matching HTML)
         val wallL = MeshBuilder.box(0.2f, 8f, chamberSize)
         wallL.material = wallMaterial
         MatrixUtil.translate(wallL.transform, -chamberSize / 2, 0f, 0f)
         out.add(wallL)
-
         val wallR = MeshBuilder.box(0.2f, 8f, chamberSize)
         wallR.material = wallMaterial
         MatrixUtil.translate(wallR.transform, chamberSize / 2, 0f, 0f)
         out.add(wallR)
-
         val wallB = MeshBuilder.box(chamberSize, 8f, 0.2f)
         wallB.material = wallMaterial
         MatrixUtil.translate(wallB.transform, 0f, 0f, -chamberSize / 2)
         out.add(wallB)
-
         val wallF = MeshBuilder.box(chamberSize, 8f, 0.2f)
         wallF.material = wallMaterial
         MatrixUtil.translate(wallF.transform, 0f, 0f, chamberSize / 2)
         out.add(wallF)
 
-        // Build platform (note: the platform is normally inside the platformGroup that
-        // moves down per layer, but we render it at the *current* platformY; the engine
-        // exposes the latest voxel positions which already account for the lowered
-        // platform, so we just position the platform at platformY).
+        // Build platform (moves down per layer; centered at origin like the HTML).
         val platform = MeshBuilder.box(chamberSize - 1f, 0.3f, chamberSize - 1f)
         platform.material = platformMaterial
         MatrixUtil.translate(platform.transform, 0f, platformY - 0.15f, 0f)
         out.add(platform)
 
-        // Powder stock
+        // Powder supply on the LEFT (matches HTML "powder stock" at x = -chamberSize/2 - 1.5).
         val stock = MeshBuilder.box(2f, 4f, chamberSize - 1f)
         stock.material = powderStockMaterial
-        MatrixUtil.translate(stock.transform, -chamberSize / 2 - 1.5f, 2f, 0f)
+        MatrixUtil.translate(stock.transform, -chamberSize / 2f - 1.5f, buildSurfaceY - 2f, 0f)
         out.add(stock)
 
-        // Recoater
+        // Recoater body (a horizontal bar that sits over the powder/build line).
         val recoaterBody = MeshBuilder.box(0.3f, 0.5f, chamberSize - 1f)
         recoaterBody.material = recoaterBodyMaterial
         MatrixUtil.translate(recoaterBody.transform, recoaterX, recoaterY, 0f)
         out.add(recoaterBody)
 
+        // Recoater blade hanging below the body
         val recoaterBlade = MeshBuilder.box(0.1f, 0.8f, chamberSize - 1f)
         recoaterBlade.material = recoaterBladeMaterial
         MatrixUtil.translate(recoaterBlade.transform, recoaterX, recoaterY - 0.4f, 0f)
@@ -563,6 +568,7 @@ class GameEngine {
 
     fun buildStaticLines(): List<Pair<LineMesh, FloatArray>> {
         val out = ArrayList<Pair<LineMesh, FloatArray>>()
+        // Main grid on the build platform (matches HTML GridHelper at buildSurfaceY).
         val grid = MeshBuilder.grid(chamberSize - 1f, 10)
         grid.material = Material(0.4f, 0.4f, 0.4f, 1f)
         val model = FloatArray(16); MatrixUtil.translate(model, 0f, buildSurfaceY, 0f)
@@ -582,23 +588,46 @@ class GameEngine {
     }
 
     fun buildCoordinateLabels(): List<Mesh> {
-        // Coordinate labels are X/Y numeric markers painted on small planes. We omit the
-        // text rendering and instead draw a few short tick lines as a stand-in.
+        // Coordinate label ticks positioned like the HTML text sprites.
+        // X-axis ticks (cyan) along the front edge (positive Z).
+        // Z-axis ticks (yellow) along the right edge (positive X).
         val out = ArrayList<Mesh>()
+        val labelZ = chamberSize / 2 + 1.5f
+        val labelX = chamberSize / 2 + 1.5f
         for (i in -4..4) {
             val x = i * ((chamberSize - 1) / 10)
-            val tick = MeshBuilder.box(0.05f, 0.01f, 0.15f)
+            val tick = MeshBuilder.box(0.5f, 0.01f, 0.05f)
             tick.material = Material(0f, 1f, 1f, 1f)
-            MatrixUtil.translate(tick.transform, x, buildSurfaceY + 0.005f, chamberSize / 2 + 0.5f)
+            MatrixUtil.translate(tick.transform, x, buildSurfaceY - 0.3f, labelZ)
             out.add(tick)
         }
         for (i in -4..4) {
             val z = i * ((chamberSize - 1) / 10)
-            val tick = MeshBuilder.box(0.15f, 0.01f, 0.05f)
+            val tick = MeshBuilder.box(0.05f, 0.01f, 0.5f)
             tick.material = Material(1f, 1f, 0f, 1f)
-            MatrixUtil.translate(tick.transform, chamberSize / 2 + 0.5f, buildSurfaceY + 0.005f, z)
+            MatrixUtil.translate(tick.transform, labelX, buildSurfaceY - 0.3f, z)
             out.add(tick)
         }
+        // Axis name markers (larger ticks) matching HTML X / Y labels.
+        val xMarker = MeshBuilder.box(0.6f, 0.02f, 0.08f)
+        xMarker.material = Material(0f, 1f, 1f, 1f)
+        MatrixUtil.translate(xMarker.transform, 0f, buildSurfaceY - 0.3f, labelZ + 1f)
+        out.add(xMarker)
+        val zMarker = MeshBuilder.box(0.08f, 0.02f, 0.6f)
+        zMarker.material = Material(1f, 1f, 0f, 1f)
+        MatrixUtil.translate(zMarker.transform, labelX + 1f, buildSurfaceY - 0.3f, 0f)
+        out.add(zMarker)
+        // Component labels as colored blocks.
+        // "POWDER STOCK" marker on the left.
+        val stockLabel = MeshBuilder.box(2f, 0.02f, 0.3f)
+        stockLabel.material = Material(1f, 0.6f, 0f, 1f)
+        MatrixUtil.translate(stockLabel.transform, -chamberSize / 2 - 1.5f, buildSurfaceY, 0f)
+        out.add(stockLabel)
+        // "BUILD PLATFORM" marker on the platform.
+        val bedLabel = MeshBuilder.box(2f, 0.02f, 0.3f)
+        bedLabel.material = Material(0f, 1f, 0f, 1f)
+        MatrixUtil.translate(bedLabel.transform, 0f, buildSurfaceY + 0.2f, 0f)
+        out.add(bedLabel)
         return out
     }
 

@@ -7,7 +7,10 @@ import kotlin.math.sin
  * Orbit camera matching the HTML's `cameraAngle.theta/phi` + `cameraDistance` model.
  * - theta rotates around the Y axis.
  * - phi tilts the camera from straight up.
- * - lookAt target is the origin (0, 0, 0).
+ * - lookAt target is the scene origin.
+ *
+ * HTML defaults: theta = π/4 (camera in the +X,+Z quadrant looking toward origin),
+ * phi = π/4 (45° elevation above the platform).
  */
 class Camera {
     var theta: Float = (Math.PI / 4).toFloat()

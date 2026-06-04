@@ -103,7 +103,11 @@ app/src/main/java/com/laserforge/lpbf/
 - The voxel pattern math (gaussian / tophat / doughnut / elliptical),
   powder particle physics, recoater slide, match-scoring formula, and
   3D shape voxel generation are all ported line-for-line from the HTML.
+- The scene is laid out to mirror the HTML: powder stock is on the
+  left, the recoater sweeps toward the build area on the right, and the
+  default camera view (`theta = -π/2`, `phi = π/4`) frames the chamber
+  the same way the original did.
 
 ## License
 
-Personal project — adapt freely.
+Released under the [MIT License](LICENSE).

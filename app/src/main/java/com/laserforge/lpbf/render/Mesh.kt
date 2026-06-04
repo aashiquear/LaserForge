@@ -105,14 +105,14 @@ object MeshBuilder {
             floatArrayOf(-1f, 0f, 0f) to arrayOf(
                 floatArrayOf(-hw, -hh,  hd), floatArrayOf(-hw, -hh, -hd),
                 floatArrayOf(-hw,  hh, -hd), floatArrayOf(-hw,  hh,  hd)),
-            // +Y
+            // +Y (counter-clockwise when viewed from above so normal points up)
             floatArrayOf(0f, 1f, 0f) to arrayOf(
-                floatArrayOf(-hw,  hh,  hd), floatArrayOf( hw,  hh,  hd),
-                floatArrayOf( hw,  hh, -hd), floatArrayOf(-hw,  hh, -hd)),
-            // -Y
+                floatArrayOf(-hw,  hh, -hd), floatArrayOf( hw,  hh, -hd),
+                floatArrayOf( hw,  hh,  hd), floatArrayOf(-hw,  hh,  hd)),
+            // -Y (counter-clockwise when viewed from below so normal points down)
             floatArrayOf(0f, -1f, 0f) to arrayOf(
-                floatArrayOf(-hw, -hh, -hd), floatArrayOf( hw, -hh, -hd),
-                floatArrayOf( hw, -hh,  hd), floatArrayOf(-hw, -hh,  hd)),
+                floatArrayOf(-hw, -hh,  hd), floatArrayOf( hw, -hh,  hd),
+                floatArrayOf( hw, -hh, -hd), floatArrayOf(-hw, -hh, -hd)),
             // +Z
             floatArrayOf(0f, 0f, 1f) to arrayOf(
                 floatArrayOf( hw, -hh,  hd), floatArrayOf(-hw, -hh,  hd),
@@ -131,11 +131,11 @@ object MeshBuilder {
                 verts[vi++] = normal[0]; verts[vi++] = normal[1]; verts[vi++] = normal[2]
             }
             idx[ii++] = (base + 0).toShort()
+            idx[ii++] = (base + 2).toShort()
             idx[ii++] = (base + 1).toShort()
-            idx[ii++] = (base + 2).toShort()
             idx[ii++] = (base + 0).toShort()
-            idx[ii++] = (base + 2).toShort()
             idx[ii++] = (base + 3).toShort()
+            idx[ii++] = (base + 2).toShort()
             base += 4
         }
         return Mesh(verts, idx, Material(1f, 1f, 1f))
@@ -186,8 +186,8 @@ object MeshBuilder {
             val b = (i * 2 + 1).toShort()
             val c = ((i + 1) * 2).toShort()
             val d = ((i + 1) * 2 + 1).toShort()
-            idx.add(a); idx.add(b); idx.add(d)
-            idx.add(a); idx.add(d); idx.add(c)
+            idx.add(a); idx.add(d); idx.add(b)
+            idx.add(a); idx.add(c); idx.add(d)
         }
         return Mesh(verts.toFloatArray(), idx.toShortArray(), Material(1f, 1f, 1f))
     }
@@ -212,8 +212,8 @@ object MeshBuilder {
             val b = (i * 2 + 1).toShort()
             val c = ((i + 1) * 2).toShort()
             val d = ((i + 1) * 2 + 1).toShort()
-            idx.add(a); idx.add(b); idx.add(d)
-            idx.add(a); idx.add(d); idx.add(c)
+            idx.add(a); idx.add(d); idx.add(b)
+            idx.add(a); idx.add(c); idx.add(d)
         }
         return Mesh(verts.toFloatArray(), idx.toShortArray(), Material(1f, 1f, 1f))
     }
@@ -249,8 +249,8 @@ object MeshBuilder {
                 val b = (lat * cols + lon + 1).toShort()
                 val c = ((lat + 1) * cols + lon).toShort()
                 val d = ((lat + 1) * cols + lon + 1).toShort()
-                idx.add(a); idx.add(c); idx.add(b)
-                idx.add(b); idx.add(c); idx.add(d)
+                idx.add(a); idx.add(b); idx.add(c)
+                idx.add(b); idx.add(d); idx.add(c)
             }
         }
         return Mesh(verts.toFloatArray(), idx.toShortArray(), Material(1f, 1f, 1f))

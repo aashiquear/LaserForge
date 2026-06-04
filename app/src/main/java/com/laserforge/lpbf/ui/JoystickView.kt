@@ -120,6 +120,8 @@ class JoystickView @JvmOverloads constructor(
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        // Prevent parent ScrollView from stealing touch events during joystick drag
+        parent?.requestDisallowInterceptTouchEvent(true)
         when (event.action) {
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
                 touching = true

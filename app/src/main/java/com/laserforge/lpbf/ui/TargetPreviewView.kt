@@ -30,7 +30,7 @@ class TargetPreviewView @JvmOverloads constructor(
         setRenderer(renderer)
         renderMode = RENDERMODE_CONTINUOUSLY
         renderer.camera.distance = 7f
-        renderer.camera.theta = (Math.PI / 4).toFloat()
+        renderer.camera.theta = (-3 * Math.PI / 4).toFloat()
         renderer.camera.phi = (Math.PI / 3).toFloat()
         renderer.clearColor = floatArrayOf(0.102f, 0.102f, 0.102f, 1f)
         // Configure lights for the preview.

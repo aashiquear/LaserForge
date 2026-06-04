@@ -324,7 +324,7 @@ class MainActivity : AppCompatActivity() {
             textAlign = android.graphics.Paint.Align.CENTER
             typeface = android.graphics.Typeface.DEFAULT
         }
-        val ch = shape.name
+        val ch = shape.symbol
         p.textSize = if (ch.length == 1 && ch[0].isDigit() || (ch.length == 1 && ch[0] in 'A'..'Z')) 120f else 100f
         if (ch.length == 1 && ch[0] in 'A'..'Z') p.typeface = android.graphics.Typeface.DEFAULT_BOLD
         c.drawText(ch, 100f, 75f + p.textSize / 3f, p)

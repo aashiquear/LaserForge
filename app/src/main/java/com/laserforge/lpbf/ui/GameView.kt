@@ -37,6 +37,8 @@ class GameView @JvmOverloads constructor(
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        // Prevent ScrollView from intercepting touches while we are interacting with the 3D view
+        parent?.requestDisallowInterceptTouchEvent(true)
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 lastTouch = event.x to event.y

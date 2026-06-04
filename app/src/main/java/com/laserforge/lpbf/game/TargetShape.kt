@@ -85,7 +85,7 @@ object TargetShape {
     )
 
     /** Returns a string of (x, z) voxels for a 2D shape. */
-    data class Shape2D(val name: String, val voxels: List<Pair<Float, Float>>)
+    data class Shape2D(val name: String, val symbol: String, val voxels: List<Pair<Float, Float>>)
 
     /** Returns a [MatchCalculator.Voxel] list for a 3D shape, plus its [name] and [layers]. */
     data class Shape3D(val name: String, val layers: Int, val voxels: List<MatchCalculator.Voxel>)
@@ -93,10 +93,10 @@ object TargetShape {
     fun generate2D(type: String): Shape2D {
         return if (type == "alphanumeric") {
             val ch = alphanumeric.random()
-            Shape2D(ch, sampleShape(ch, isAlphanumeric = true))
+            Shape2D(ch, ch, sampleShape(ch, isAlphanumeric = true))
         } else {
             val e = emojis.random()
-            Shape2D(e.name, sampleShape(e.char, isAlphanumeric = false))
+            Shape2D(e.name, e.char, sampleShape(e.char, isAlphanumeric = false))
         }
     }
 
