@@ -1,6 +1,11 @@
 package com.laserforge.lpbf.render
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.opengl.GLES20
+import android.opengl.GLUtils
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
@@ -9,14 +14,17 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * A drawable mesh: interleaved position+normal (6 floats per vertex) plus a short index buffer.
+ * A drawable mesh: interleaved position+normal+uv (8 floats per vertex) plus a short index buffer.
  * Material is per-mesh; world transform is via [transform] (column-major 4x4).
  */
 class Mesh(
     val vertexData: FloatArray,
     val indexData: ShortArray,
     var material: Material,
-    var transform: FloatArray = MatrixUtil.let { FloatArray(16).also { MatrixUtil.identity(it) } }
+    var transform: FloatArray = MatrixUtil.let { FloatArray(16).also { MatrixUtil.identity(it) } },
+    var textureId: Int = -1,
+    var labelText: String? = null,
+    val stride: Int = 6 // 6 if pos+normal, 8 if pos+normal+uv
 ) {
     val vertexBuffer: FloatBuffer = ByteBuffer
         .allocateDirect(vertexData.size * 4).order(ByteOrder.nativeOrder()).asFloatBuffer()
@@ -56,33 +64,57 @@ class Mesh(
         if (!uploaded) upload()
         val aPos = shader.attrib("aPos")
         val aNormal = shader.attrib("aNormal")
+        val aUV = shader.attrib("aUV")
+        
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo)
-        GLES20.glEnableVertexAttribArray(aPos)
-        GLES20.glVertexAttribPointer(aPos, 3, GLES20.GL_FLOAT, false, 6 * 4, 0)
+        if (aPos >= 0) {
+            GLES20.glEnableVertexAttribArray(aPos)
+            GLES20.glVertexAttribPointer(aPos, 3, GLES20.GL_FLOAT, false, stride * 4, 0)
+        }
         if (aNormal >= 0) {
             GLES20.glEnableVertexAttribArray(aNormal)
-            GLES20.glVertexAttribPointer(aNormal, 3, GLES20.GL_FLOAT, false, 6 * 4, 3 * 4)
+            GLES20.glVertexAttribPointer(aNormal, 3, GLES20.GL_FLOAT, false, stride * 4, 3 * 4)
         }
+        if (aUV >= 0 && stride >= 8) {
+            GLES20.glEnableVertexAttribArray(aUV)
+            GLES20.glVertexAttribPointer(aUV, 2, GLES20.GL_FLOAT, false, stride * 4, 6 * 4)
+        }
+        
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo)
         // Compute MVP
         val mvp = FloatArray(16)
         MatrixUtil.multiply(mvp, viewProj, transform)
         GLES20.glUniformMatrix4fv(shader.uniform("uMVP"), 1, false, mvp, 0)
         GLES20.glUniformMatrix4fv(shader.uniform("uModel"), 1, false, transform, 0)
-        // For uniform scale transforms, the normal matrix is the model matrix itself.
-        // We use the model matrix directly (no shearing in this game), but transpose 3x3
-        // to be safe for the rare non-uniform scale.
+        
         val nm = FloatArray(16)
         MatrixUtil.transpose(nm, transform)
         GLES20.glUniformMatrix4fv(shader.uniform("uNormalMat"), 1, false, nm, 0)
+        
         // Material
         GLES20.glUniform3f(shader.uniform("uAlbedo"), material.r, material.g, material.b)
         GLES20.glUniform1f(shader.uniform("uAlpha"), material.alpha)
         GLES20.glUniform3f(shader.uniform("uEmissive"),
             material.emissiveR, material.emissiveG, material.emissiveB)
+            
+        if (textureId != -1) {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
+            GLES20.glUniform1i(shader.uniform("uTex"), 0)
+            GLES20.glUniform1i(shader.uniform("uUseTex"), 1)
+            GLES20.glDisable(GLES20.GL_CULL_FACE)
+        } else {
+            GLES20.glUniform1i(shader.uniform("uUseTex"), 0)
+            GLES20.glEnable(GLES20.GL_CULL_FACE)
+        }
+        
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, indexCount, GLES20.GL_UNSIGNED_SHORT, 0)
+        
+        if (textureId != -1) GLES20.glEnable(GLES20.GL_CULL_FACE)
+        
         if (aPos >= 0) GLES20.glDisableVertexAttribArray(aPos)
         if (aNormal >= 0) GLES20.glDisableVertexAttribArray(aNormal)
+        if (aUV >= 0 && stride >= 8) GLES20.glDisableVertexAttribArray(aUV)
     }
 }
 
@@ -131,11 +163,11 @@ object MeshBuilder {
                 verts[vi++] = normal[0]; verts[vi++] = normal[1]; verts[vi++] = normal[2]
             }
             idx[ii++] = (base + 0).toShort()
-            idx[ii++] = (base + 2).toShort()
             idx[ii++] = (base + 1).toShort()
-            idx[ii++] = (base + 0).toShort()
-            idx[ii++] = (base + 3).toShort()
             idx[ii++] = (base + 2).toShort()
+            idx[ii++] = (base + 0).toShort()
+            idx[ii++] = (base + 2).toShort()
+            idx[ii++] = (base + 3).toShort()
             base += 4
         }
         return Mesh(verts, idx, Material(1f, 1f, 1f))
@@ -145,17 +177,28 @@ object MeshBuilder {
      * Plane in XY at z=0 with size (w, h) and optional UVs. Used both for the powder bed
      * and as the basis for text sprites.
      */
-    fun plane(w: Float, h: Float): Mesh {
+    fun plane(w: Float, h: Float, hasUV: Boolean = false): Mesh {
         val hw = w / 2f; val hh = h / 2f
         val n = floatArrayOf(0f, 0f, 1f)
-        val verts = floatArrayOf(
-            -hw, -hh, 0f, n[0], n[1], n[2],
-             hw, -hh, 0f, n[0], n[1], n[2],
-             hw,  hh, 0f, n[0], n[1], n[2],
-            -hw,  hh, 0f, n[0], n[1], n[2]
-        )
-        val idx = shortArrayOf(0, 1, 2, 0, 2, 3)
-        return Mesh(verts, idx, Material(1f, 1f, 1f))
+        return if (!hasUV) {
+            val verts = floatArrayOf(
+                -hw, -hh, 0f, n[0], n[1], n[2],
+                 hw, -hh, 0f, n[0], n[1], n[2],
+                 hw,  hh, 0f, n[0], n[1], n[2],
+                -hw,  hh, 0f, n[0], n[1], n[2]
+            )
+            val idx = shortArrayOf(0, 1, 2, 0, 2, 3)
+            Mesh(verts, idx, Material(1f, 1f, 1f), stride = 6)
+        } else {
+            val verts = floatArrayOf(
+                -hw, -hh, 0f, n[0], n[1], n[2], 0f, 1f,
+                 hw, -hh, 0f, n[0], n[1], n[2], 1f, 1f,
+                 hw,  hh, 0f, n[0], n[1], n[2], 1f, 0f,
+                -hw,  hh, 0f, n[0], n[1], n[2], 0f, 0f
+            )
+            val idx = shortArrayOf(0, 1, 2, 0, 2, 3)
+            Mesh(verts, idx, Material(1f, 1f, 1f), stride = 8)
+        }
     }
 
     /**
@@ -278,6 +321,38 @@ object MeshBuilder {
     }
 }
 
+object TextureUtil {
+    fun createTextTexture(text: String, fontSize: Float = 64f, color: Int = Color.WHITE): Int {
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            this.textSize = fontSize
+            this.color = color
+            this.textAlign = Paint.Align.CENTER
+            this.isFakeBoldText = true
+        }
+        
+        val baseline = -paint.ascent()
+        val width = paint.measureText(text).toInt().coerceAtLeast(1)
+        val height = (baseline + paint.descent()).toInt().coerceAtLeast(1)
+        
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        bitmap.eraseColor(Color.TRANSPARENT)
+        canvas.drawText(text, width / 2f, baseline, paint)
+        
+        val textures = IntArray(1)
+        GLES20.glGenTextures(1, textures, 0)
+        val textureId = textures[0]
+        
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR)
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
+        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0)
+        
+        bitmap.recycle()
+        return textureId
+    }
+}
+
 /** A line-segment mesh, rendered with GL_LINES. */
 class LineMesh(val vertexData: FloatArray, var material: Material) {
     val vertexBuffer: FloatBuffer = ByteBuffer
@@ -310,8 +385,10 @@ class LineMesh(val vertexData: FloatArray, var material: Material) {
         val aPos = shader.attrib("aPos")
         val aNormal = shader.attrib("aNormal")
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo)
-        GLES20.glEnableVertexAttribArray(aPos)
-        GLES20.glVertexAttribPointer(aPos, 3, GLES20.GL_FLOAT, false, 6 * 4, 0)
+        if (aPos >= 0) {
+            GLES20.glEnableVertexAttribArray(aPos)
+            GLES20.glVertexAttribPointer(aPos, 3, GLES20.GL_FLOAT, false, 6 * 4, 0)
+        }
         if (aNormal >= 0) {
             GLES20.glEnableVertexAttribArray(aNormal)
             GLES20.glVertexAttribPointer(aNormal, 3, GLES20.GL_FLOAT, false, 6 * 4, 3 * 4)

@@ -16,7 +16,7 @@ class GameRenderer(
 
     val camera: Camera = Camera()
     val sceneLights: SceneLights = SceneLights()
-    private val objects: MutableList<RenderObject> = mutableListOf()
+    private val objects: MutableList<RenderObject.MeshObject> = mutableListOf()
     private val lines: MutableList<RenderLine> = mutableListOf()
 
     var aspect: Float = 1f
@@ -26,13 +26,22 @@ class GameRenderer(
     private val viewMatrix = FloatArray(16)
     private val projMatrix = FloatArray(16)
 
-    lateinit var litShader: ShaderProgram
+    private var litShader: ShaderProgram? = null
     var onSurfaceCreated: (() -> Unit)? = null
+    
+    private val labelCache = HashMap<String, Int>()
 
     /** Background color in clear, set by GameEngine depending on state. */
     @Volatile var clearColor: FloatArray = floatArrayOf(0.102f, 0.102f, 0.180f, 1f)
+    
+    val isInitialized: Boolean get() = litShader != null
 
     fun addMesh(mesh: Mesh, model: FloatArray = mesh.transform) {
+        mesh.labelText?.let { text ->
+            mesh.textureId = labelCache.getOrPut(text) {
+                TextureUtil.createTextTexture(text)
+            }
+        }
         objects.add(RenderObject.MeshObject(mesh, model))
     }
 
@@ -41,8 +50,8 @@ class GameRenderer(
     }
 
     fun clearObjects() {
-        for (o in objects) when (o) {
-            is RenderObject.MeshObject -> o.mesh.release()
+        for (o in objects) {
+            o.mesh.release()
         }
         for (l in lines) l.line.release()
         objects.clear()
@@ -55,6 +64,7 @@ class GameRenderer(
         GLES20.glEnable(GLES20.GL_CULL_FACE)
         GLES20.glCullFace(GLES20.GL_BACK)
         GLES20.glFrontFace(GLES20.GL_CCW)
+        labelCache.clear()
         onSurfaceCreated?.invoke()
     }
 
@@ -75,24 +85,35 @@ class GameRenderer(
         val vp = FloatArray(16)
         MatrixUtil.multiply(vp, projMatrix, viewMatrix)
 
-        litShader.use()
-        applyLights(litShader)
+        val shader = litShader ?: return
+        shader.use()
+        applyLights(shader)
         GLES20.glEnable(GLES20.GL_BLEND)
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
 
-        for (ro in objects) {
-            when (ro) {
-                is RenderObject.MeshObject -> {
-                    val model = ro.model
-                    ro.mesh.material = ro.mesh.material
-                    ro.mesh.draw(litShader, vp)
-                }
-            }
+        // Split into opaque and transparent for basic sorting
+        val opaque = objects.filter { it.mesh.material.alpha >= 1f }
+        val transparent = objects.filter { it.mesh.material.alpha < 1f }
+
+        // Render opaque first
+        GLES20.glDepthMask(true)
+        for (ro in opaque) {
+            ro.mesh.draw(shader, vp)
         }
+        
+        // Render lines
         for (rl in lines) {
-            rl.line.material = rl.line.material
-            rl.line.draw(litShader, vp, rl.model)
+            rl.line.draw(shader, vp, rl.model)
         }
+
+        // Render transparent second
+        // For best results we'd sort these back-to-front, but for this scene
+        // let's at least disable depth writing to avoid artifacts.
+        GLES20.glDepthMask(false)
+        for (ro in transparent) {
+            ro.mesh.draw(shader, vp)
+        }
+        GLES20.glDepthMask(true)
     }
 
     private fun applyLights(shader: ShaderProgram) {

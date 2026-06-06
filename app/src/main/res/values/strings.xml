@@ -80,4 +80,7 @@
     <string name="status_match_3d">Build the 3D shape!</string>
     <string name="status_pick_first">Choose a shape to start!</string>
     <string name="value_mm_suffix">mm</string>
+    <string name="hint_laser_width">Laser Width (mm)</string>
+    <string name="hint_laser_power">Laser Power (W)</string>
+    <string name="hint_layer_thickness">Layer Thickness (mm)</string>
 </resources>

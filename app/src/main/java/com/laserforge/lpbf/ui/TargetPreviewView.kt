@@ -47,12 +47,37 @@ class TargetPreviewView @JvmOverloads constructor(
     fun setTarget(targetMeshes: List<Mesh>, key: String) {
         if (key == lastTargetKey) return
         lastTargetKey = key
+        
+        // Center meshes
+        if (targetMeshes.isNotEmpty()) {
+            var minX = Float.MAX_VALUE; var maxX = Float.MIN_VALUE
+            var minY = Float.MAX_VALUE; var maxY = Float.MIN_VALUE
+            var minZ = Float.MAX_VALUE; var maxZ = Float.MIN_VALUE
+            
+            for (m in targetMeshes) {
+                val tx = m.transform[12]; val ty = m.transform[13]; val tz = m.transform[14]
+                minX = minOf(minX, tx); maxX = maxOf(maxX, tx)
+                minY = minOf(minY, ty); maxY = maxOf(maxY, ty)
+                minZ = minOf(minZ, tz); maxZ = maxOf(maxZ, tz)
+            }
+            
+            val cx = (minX + maxX) / 2f
+            val cy = (minY + maxY) / 2f
+            val cz = (minZ + maxZ) / 2f
+            
+            for (m in targetMeshes) {
+                m.transform[12] -= cx
+                m.transform[13] -= cy
+                m.transform[14] -= cz
+            }
+        }
+
         currentTargetMeshes = targetMeshes
         // Tell renderer to repopulate.
         queueEvent {
             renderer.clearObjects()
             for (m in currentTargetMeshes) {
-                renderer.addMesh(m, m.transform)
+                renderer.addMesh(m)
             }
         }
     }

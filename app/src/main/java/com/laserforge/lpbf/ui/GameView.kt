@@ -122,9 +122,12 @@ class GameView @JvmOverloads constructor(
         val t = (engine.buildSurfaceY - nearWorld[1]) / dy
         val wx = nearWorld[0] + t * dx
         val wz = nearWorld[2] + t * dz
-        // Apply the platform offset.
-        val localX = wx
-        val localZ = wz
+        
+        // Clamp to build plate (chamberSize - 1) / 2
+        val maxPos = (engine.chamberSize - 1f) / 2f
+        val localX = wx.coerceIn(-maxPos, maxPos)
+        val localZ = wz.coerceIn(-maxPos, maxPos)
+
         engine.onDrawing(localX, localZ)
     }
 

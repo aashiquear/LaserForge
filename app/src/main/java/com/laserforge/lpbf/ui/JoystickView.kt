@@ -129,7 +129,8 @@ class JoystickView @JvmOverloads constructor(
                 val rectH = height.toFloat()
                 val cx = rectW / 2f
                 val cy = rectH / 2f
-                val maxDistance = min(rectW, rectH) / 2f - dp(20f)
+                val handleR = min(rectW, rectH) / 2f * 0.4f
+                val maxDistance = min(rectW, rectH) / 2f - handleR
                 var dx = event.x - cx
                 var dy = event.y - cy
                 val dist = sqrt(dx * dx + dy * dy)
@@ -146,11 +147,20 @@ class JoystickView @JvmOverloads constructor(
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 if (!touching) return true
                 touching = false
-                handleDx = 0f
-                handleDy = 0f
-                animate().interpolator = baseInterpolator
-                animate().setDuration(200).start()
-                invalidate()
+                
+                val startX = handleDx
+                val startY = handleDy
+                val animator = android.animation.ValueAnimator.ofFloat(1f, 0f)
+                animator.duration = 200
+                animator.interpolator = baseInterpolator
+                animator.addUpdateListener { animation ->
+                    val f = animation.animatedValue as Float
+                    handleDx = startX * f
+                    handleDy = startY * f
+                    invalidate()
+                }
+                animator.start()
+
                 onEnd?.invoke()
                 return true
             }

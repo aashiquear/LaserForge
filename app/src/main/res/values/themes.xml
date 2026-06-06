@@ -22,7 +22,7 @@
     -->
     <style name="Theme.LaserForge.Launcher" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/bg_start</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo_with_caption</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
         <item name="postSplashScreenTheme">@style/Theme.LaserForge</item>
     </style>
 </resources>

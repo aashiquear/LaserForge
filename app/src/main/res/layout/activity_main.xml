@@ -1,765 +1,591 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:scrollbars="none"
+    android:background="@drawable/bg_gradient"
     tools:context=".MainActivity">
 
+    <!-- Title -->
+    <TextView
+        android:id="@+id/titleText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/title"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:paddingTop="4dp"
+        android:paddingBottom="2dp"
+        android:textColor="@color/title_start"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/subtitleText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/subtitle"
+        android:textSize="10sp"
+        android:gravity="center"
+        android:alpha="0.7"
+        android:textColor="@color/text_primary"
+        android:paddingBottom="4dp"
+        app:layout_constraintTop_toBottomOf="@id/titleText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Mode row -->
     <LinearLayout
+        android:id="@+id/modeButtons"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingHorizontal="4dp"
+        app:layout_constraintTop_toBottomOf="@id/subtitleText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <Button
+            android:id="@+id/modeFreeBtn"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="2dp"
+            android:background="@drawable/btn_mode_active"
+            android:text="@string/mode_free"
+            android:textColor="@color/text_primary"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:minHeight="0dp" />
+        <Button
+            android:id="@+id/mode2dBtn"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
+            android:background="@drawable/btn_mode"
+            android:text="@string/mode_2d"
+            android:textColor="@color/text_primary"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:minHeight="0dp" />
+        <Button
+            android:id="@+id/mode3dBtn"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:layout_marginStart="2dp"
+            android:background="@drawable/btn_mode"
+            android:text="@string/mode_3d"
+            android:textColor="@color/text_primary"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:minHeight="0dp" />
+    </LinearLayout>
+
+    <!-- 2D / 3D shape choice chips -->
+    <LinearLayout
+        android:id="@+id/shapeChoice2d"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:visibility="gone"
+        android:paddingHorizontal="4dp"
+        android:layout_marginTop="2dp"
+        app:layout_constraintTop_toBottomOf="@id/modeButtons"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <Button
+            android:id="@+id/btnAlphanumeric"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="28dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="2dp"
+            android:background="@drawable/btn_shape_option"
+            android:text="@string/shape_alphanumeric"
+            android:textColor="@color/text_primary"
+            android:textSize="9sp"
+            android:textStyle="bold"
+            android:minHeight="0dp" />
+        <Button
+            android:id="@+id/btnEmoji"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="28dp"
+            android:layout_weight="1"
+            android:layout_marginStart="2dp"
+            android:background="@drawable/btn_shape_option"
+            android:text="@string/shape_emoji"
+            android:textColor="@color/text_primary"
+            android:textSize="9sp"
+            android:textStyle="bold"
+            android:minHeight="0dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/shapeChoice3d"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:visibility="gone"
+        android:paddingHorizontal="4dp"
+        android:layout_marginTop="2dp"
+        app:layout_constraintTop_toBottomOf="@id/modeButtons"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <Button
+            android:id="@+id/btnSolid"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="28dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="2dp"
+            android:background="@drawable/btn_shape_option"
+            android:text="@string/shape_solid"
+            android:textColor="@color/text_primary"
+            android:textSize="9sp"
+            android:textStyle="bold"
+            android:minHeight="0dp" />
+        <Button
+            android:id="@+id/btnFrame"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="28dp"
+            android:layout_weight="1"
+            android:layout_marginStart="2dp"
+            android:background="@drawable/btn_shape_option"
+            android:text="@string/shape_frame"
+            android:textColor="@color/text_primary"
+            android:textSize="9sp"
+            android:textStyle="bold"
+            android:minHeight="0dp" />
+    </LinearLayout>
+
+    <!-- Target display -->
+    <LinearLayout
+        android:id="@+id/targetDisplay"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/target_preview_bg"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="8dp"
+        android:visibility="gone"
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintTop_toBottomOf="@id/shapeChoice3d"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <TextView
+            android:id="@+id/targetLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_primary"
+            android:textSize="11sp"
+            android:layout_marginBottom="8dp"
+            android:textStyle="bold"
+            tools:text="🎯 Target: A | Layers: 1" />
+        <ImageView
+            android:id="@+id/target2dImage"
+            android:layout_width="140dp"
+            android:layout_height="100dp"
+            android:background="@drawable/target_canvas_bg"
+            android:visibility="gone"
+            android:scaleType="fitCenter"
+            android:contentDescription="@string/title" />
+        <com.laserforge.lpbf.ui.TargetPreviewView
+            android:id="@+id/target3dView"
+            android:layout_width="160dp"
+            android:layout_height="110dp"
+            android:background="@drawable/target_canvas_bg"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <!-- Compact Laser Settings Panel (dropdown style) -->
+    <LinearLayout
+        android:id="@+id/laserSettingsPanel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/panel_bg"
+        android:orientation="horizontal"
+        android:padding="2dp"
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginTop="2dp"
+        app:layout_constraintTop_toBottomOf="@id/targetDisplay"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginEnd="6dp">
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/label_laser_shape"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                app:hintTextColor="@color/text_secondary"
+                app:boxStrokeColor="@color/text_secondary">
+                <AutoCompleteTextView
+                    android:id="@+id/laserShapeDropdown"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_primary"
+                    tools:ignore="LabelFor" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:hint="@string/hint_laser_width"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                app:hintTextColor="@color/text_secondary"
+                app:boxStrokeColor="@color/text_secondary">
+                <AutoCompleteTextView
+                    android:id="@+id/laserWidthDropdown"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_primary"
+                    tools:ignore="LabelFor" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="6dp">
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_laser_power"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                app:hintTextColor="@color/text_secondary"
+                app:boxStrokeColor="@color/text_secondary">
+                <AutoCompleteTextView
+                    android:id="@+id/laserPowerDropdown"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_primary"
+                    tools:ignore="LabelFor" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:hint="@string/hint_layer_thickness"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                app:hintTextColor="@color/text_secondary"
+                app:boxStrokeColor="@color/text_secondary">
+                <AutoCompleteTextView
+                    android:id="@+id/layerThicknessDropdown"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_primary"
+                    tools:ignore="LabelFor" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Status message -->
+    <TextView
+        android:id="@+id/statusMessage"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/status_message_bg"
+        android:padding="6dp"
+        android:textColor="@color/text_primary"
+        android:textSize="11sp"
+        android:gravity="center"
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginTop="4dp"
+        android:text="@string/status_default"
+        app:layout_constraintTop_toBottomOf="@id/laserSettingsPanel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Top status bar -->
+    <com.laserforge.lpbf.ui.CoordinateBarView
+        android:id="@+id/topStatusBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/status_bar_top_bg"
+        android:padding="6dp"
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintTop_toBottomOf="@id/statusMessage"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Canvas container (uses 0dp height anchored between top and bottom bars) -->
+    <FrameLayout
+        android:id="@+id/canvasContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/canvas_bg"
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
+        app:layout_constraintTop_toBottomOf="@id/topStatusBar"
+        app:layout_constraintBottom_toTopOf="@id/bottomStatusBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <com.laserforge.lpbf.ui.GameView
+            android:id="@+id/gameView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:orientation="vertical"
+            android:padding="6dp">
+            <Button
+                android:id="@+id/camZoomIn"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:background="@drawable/camera_btn"
+                android:text="+"
+                android:textColor="@color/text_primary"
+                android:textSize="12sp"
+                android:contentDescription="@string/cam_zoom_in"
+                android:minHeight="0dp"
+                android:minWidth="0dp"
+                android:padding="0dp" />
+            <Button
+                android:id="@+id/camZoomOut"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginTop="2dp"
+                android:background="@drawable/camera_btn"
+                android:text="−"
+                android:textColor="@color/text_primary"
+                android:textSize="12sp"
+                android:contentDescription="@string/cam_zoom_out"
+                android:minHeight="0dp"
+                android:minWidth="0dp"
+                android:padding="0dp" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="2dp">
+                <Button
+                    android:id="@+id/camRotateLeft"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="@drawable/camera_btn"
+                    android:text="↺"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:contentDescription="@string/cam_rotate_left"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:padding="0dp" />
+                <Button
+                    android:id="@+id/camRotateRight"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_marginStart="2dp"
+                    android:background="@drawable/camera_btn"
+                    android:text="↻"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:contentDescription="@string/cam_rotate_right"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:padding="0dp" />
+            </LinearLayout>
+            <Button
+                android:id="@+id/camReset"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginTop="2dp"
+                android:background="@drawable/camera_btn"
+                android:text="⌂"
+                android:textColor="@color/text_primary"
+                android:textSize="12sp"
+                android:contentDescription="@string/cam_reset"
+                android:minHeight="0dp"
+                android:minWidth="0dp"
+                android:padding="0dp" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- Bottom status bar -->
+    <com.laserforge.lpbf.ui.CoordinateBarView
+        android:id="@+id/bottomStatusBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/status_bar_bottom_bg"
+        android:padding="6dp"
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginBottom="4dp"
+        app:layout_constraintBottom_toTopOf="@id/controlPanel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Control Panel: Joystick + Buttons -->
+    <LinearLayout
+        android:id="@+id/controlPanel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/panel_bg"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginBottom="4dp"
+        app:layout_constraintBottom_toTopOf="@id/instructionsToggle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <com.laserforge.lpbf.ui.JoystickView
+                android:id="@+id/joystickView"
+                android:layout_width="90dp"
+                android:layout_height="90dp" />
+            <Button
+                android:id="@+id/fireBtn"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/btn_laser_fire"
+                android:gravity="center"
+                android:textColor="@color/text_primary"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                android:lineSpacingExtra="2dp"
+                android:text="@string/fire_icon" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="10dp"
+            android:orientation="vertical"
+            android:gravity="center">
+            <Button
+                android:id="@+id/nextLayerBtn"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/btn_next_layer"
+                android:textColor="@color/text_primary"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:minHeight="34dp"
+                android:text="@string/action_next_layer" />
+            <Button
+                android:id="@+id/finishBtn"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/btn_finish"
+                android:textColor="@color/text_primary"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:minHeight="34dp"
+                android:text="@string/action_finish" />
+            <Button
+                android:id="@+id/resetBtn"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/btn_reset"
+                android:textColor="@color/text_primary"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:minHeight="34dp"
+                android:text="@string/action_reset" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Instructions toggle -->
+    <LinearLayout
+        android:id="@+id/instructionsToggle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/instructions_toggle_bg"
+        android:padding="6dp"
+        android:orientation="horizontal"
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginBottom="4dp"
+        android:gravity="center_vertical"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/instructions_label"
+            android:textColor="@color/text_primary"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/toggleArrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ℹ️"
+            android:textColor="@color/text_primary"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <!-- Match result placeholder -->
+    <FrameLayout
+        android:id="@+id/matchResultContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        app:layout_constraintTop_toBottomOf="@id/controlPanel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Instructions content (hidden, used for strings if needed) -->
+    <LinearLayout
+        android:id="@+id/instructionsContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/bg_gradient"
-        android:padding="10dp">
-
-        <!-- Title -->
-        <TextView
-            android:id="@+id/titleText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/title"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:padding="6dp"
-            android:textColor="@color/title_start" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/subtitle"
-            android:textSize="11sp"
-            android:gravity="center"
-            android:alpha="0.7"
-            android:textColor="@color/text_primary"
-            android:layout_marginBottom="6dp" />
-
-        <!-- Game Mode card -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/panel_bg"
-            android:orientation="vertical"
-            android:padding="10dp"
-            android:layout_marginBottom="8dp">
-
-            <LinearLayout
-                android:id="@+id/modeButtons"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginBottom="8dp">
-
-                <Button
-                    android:id="@+id/modeFreeBtn"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="4dp"
-                    android:background="@drawable/btn_mode_active"
-                    android:text="@string/mode_free"
-                    android:textColor="@color/text_primary"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:minHeight="40dp" />
-
-                <Button
-                    android:id="@+id/mode2dBtn"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginEnd="4dp"
-                    android:background="@drawable/btn_mode"
-                    android:text="@string/mode_2d"
-                    android:textColor="@color/text_primary"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:minHeight="40dp" />
-
-                <Button
-                    android:id="@+id/mode3dBtn"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp"
-                    android:background="@drawable/btn_mode"
-                    android:text="@string/mode_3d"
-                    android:textColor="@color/text_primary"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:minHeight="40dp" />
-            </LinearLayout>
-
-            <!-- 2D shape choice (Letters or Symbols) -->
-            <LinearLayout
-                android:id="@+id/shapeChoice2d"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:visibility="gone"
-                android:layout_marginBottom="6dp">
-
-                <Button
-                    android:id="@+id/btnAlphanumeric"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="4dp"
-                    android:background="@drawable/btn_shape_option"
-                    android:text="@string/shape_alphanumeric"
-                    android:textColor="@color/text_primary"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:minHeight="36dp" />
-
-                <Button
-                    android:id="@+id/btnEmoji"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp"
-                    android:background="@drawable/btn_shape_option"
-                    android:text="@string/shape_emoji"
-                    android:textColor="@color/text_primary"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:minHeight="36dp" />
-            </LinearLayout>
-
-            <!-- 3D shape choice (Solid or Frame) -->
-            <LinearLayout
-                android:id="@+id/shapeChoice3d"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:visibility="gone"
-                android:layout_marginBottom="6dp">
-
-                <Button
-                    android:id="@+id/btnSolid"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="4dp"
-                    android:background="@drawable/btn_shape_option"
-                    android:text="@string/shape_solid"
-                    android:textColor="@color/text_primary"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:minHeight="36dp" />
-
-                <Button
-                    android:id="@+id/btnFrame"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp"
-                    android:background="@drawable/btn_shape_option"
-                    android:text="@string/shape_frame"
-                    android:textColor="@color/text_primary"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:minHeight="36dp" />
-            </LinearLayout>
-
-            <!-- Target display -->
-            <LinearLayout
-                android:id="@+id/targetDisplay"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/target_preview_bg"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:padding="10dp"
-                android:visibility="gone">
-
-                <TextView
-                    android:id="@+id/targetLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/text_primary"
-                    android:textSize="12sp"
-                    android:layout_marginBottom="6dp"
-                    tools:text="🎯 Target: A | Layers: 1" />
-
-                <!-- 2D target image -->
-                <ImageView
-                    android:id="@+id/target2dImage"
-                    android:layout_width="200dp"
-                    android:layout_height="150dp"
-                    android:background="@drawable/target_canvas_bg"
-                    android:visibility="gone"
-                    android:scaleType="fitCenter"
-                    android:contentDescription="@string/title" />
-
-                <!-- 3D target preview (small GLSurfaceView) -->
-                <com.laserforge.lpbf.ui.TargetPreviewView
-                    android:id="@+id/target3dView"
-                    android:layout_width="200dp"
-                    android:layout_height="150dp"
-                    android:background="@drawable/target_canvas_bg"
-                    android:visibility="gone" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Laser Controls card -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/panel_bg"
-            android:orientation="vertical"
-            android:padding="12dp"
-            android:layout_marginBottom="8dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginEnd="8dp">
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/label_laser_width"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="10sp"
-                        android:textStyle="bold" />
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/laserWidthSlider"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:value="2.0"
-                            android:valueFrom="1"
-                            android:valueTo="5"
-                            android:stepSize="0.5" />
-                        <TextView
-                            android:id="@+id/laserWidthValue"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="2.0mm"
-                            android:textColor="@color/slider_value"
-                            android:textSize="11sp"
-                            android:textStyle="bold"
-                            android:minWidth="48dp"
-                            android:gravity="end" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/label_laser_power"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="10sp"
-                        android:textStyle="bold" />
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/laserPowerSlider"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:value="100"
-                            android:valueFrom="50"
-                            android:valueTo="200"
-                            android:stepSize="10" />
-                        <TextView
-                            android:id="@+id/laserPowerValue"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="100W"
-                            android:textColor="@color/slider_value"
-                            android:textSize="11sp"
-                            android:textStyle="bold"
-                            android:minWidth="48dp"
-                            android:gravity="end" />
-                    </LinearLayout>
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="6dp">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginEnd="8dp">
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/label_layer_thickness"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="10sp"
-                        android:textStyle="bold" />
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/layerThicknessSlider"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:value="0.12"
-                            android:valueFrom="0.05"
-                            android:valueTo="0.30"
-                            android:stepSize="0.01" />
-                        <TextView
-                            android:id="@+id/layerThicknessValue"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0.12mm"
-                            android:textColor="@color/slider_value"
-                            android:textSize="11sp"
-                            android:textStyle="bold"
-                            android:minWidth="48dp"
-                            android:gravity="end" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/label_laser_shape"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="10sp"
-                        android:textStyle="bold" />
-                    <LinearLayout
-                        android:id="@+id/laserShapeOptions"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-                        <Button
-                            android:id="@+id/shapeGaussianBtn"
-                            style="?android:attr/borderlessButtonStyle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="28dp"
-                            android:layout_weight="1"
-                            android:layout_marginEnd="2dp"
-                            android:background="@drawable/btn_shape_option_active"
-                            android:text="@string/shape_gaussian"
-                            android:textColor="@color/text_primary"
-                            android:textSize="9sp"
-                            android:minHeight="0dp"
-                            android:paddingStart="4dp"
-                            android:paddingEnd="4dp" />
-                        <Button
-                            android:id="@+id/shapeTophatBtn"
-                            style="?android:attr/borderlessButtonStyle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="28dp"
-                            android:layout_weight="1"
-                            android:layout_marginStart="2dp"
-                            android:layout_marginEnd="2dp"
-                            android:background="@drawable/btn_shape_option"
-                            android:text="@string/shape_tophat"
-                            android:textColor="@color/text_primary"
-                            android:textSize="9sp"
-                            android:minHeight="0dp"
-                            android:paddingStart="4dp"
-                            android:paddingEnd="4dp" />
-                        <Button
-                            android:id="@+id/shapeDoughnutBtn"
-                            style="?android:attr/borderlessButtonStyle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="28dp"
-                            android:layout_weight="1"
-                            android:layout_marginStart="2dp"
-                            android:layout_marginEnd="2dp"
-                            android:background="@drawable/btn_shape_option"
-                            android:text="@string/shape_doughnut"
-                            android:textColor="@color/text_primary"
-                            android:textSize="9sp"
-                            android:minHeight="0dp"
-                            android:paddingStart="4dp"
-                            android:paddingEnd="4dp" />
-                        <Button
-                            android:id="@+id/shapeEllipticalBtn"
-                            style="?android:attr/borderlessButtonStyle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="28dp"
-                            android:layout_weight="1"
-                            android:layout_marginStart="2dp"
-                            android:background="@drawable/btn_shape_option"
-                            android:text="@string/shape_elliptical"
-                            android:textColor="@color/text_primary"
-                            android:textSize="9sp"
-                            android:minHeight="0dp"
-                            android:paddingStart="4dp"
-                            android:paddingEnd="4dp" />
-                    </LinearLayout>
-                </LinearLayout>
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Status message -->
-        <TextView
-            android:id="@+id/statusMessage"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/status_message_bg"
-            android:padding="10dp"
-            android:textColor="@color/text_primary"
-            android:textSize="12sp"
-            android:gravity="center"
-            android:layout_marginBottom="8dp"
-            android:text="@string/status_default" />
-
-        <!-- Top status bar (X / Y + pointer) -->
-        <com.laserforge.lpbf.ui.CoordinateBarView
-            android:id="@+id/topStatusBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/status_bar_top_bg"
-            android:padding="8dp" />
-
-        <!-- Canvas container with overlay camera controls -->
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:background="@drawable/canvas_bg">
-
-            <com.laserforge.lpbf.ui.GameView
-                android:id="@+id/gameView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top|end"
-                android:orientation="vertical"
-                android:padding="8dp">
-
-                <Button
-                    android:id="@+id/camZoomIn"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:background="@drawable/camera_btn"
-                    android:text="+"
-                    android:textColor="@color/text_primary"
-                    android:textSize="14sp"
-                    android:contentDescription="@string/cam_zoom_in"
-                    android:minHeight="0dp"
-                    android:minWidth="0dp"
-                    android:padding="0dp" />
-
-                <Button
-                    android:id="@+id/camZoomOut"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_marginTop="4dp"
-                    android:background="@drawable/camera_btn"
-                    android:text="−"
-                    android:textColor="@color/text_primary"
-                    android:textSize="14sp"
-                    android:contentDescription="@string/cam_zoom_out"
-                    android:minHeight="0dp"
-                    android:minWidth="0dp"
-                    android:padding="0dp" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="4dp">
-                    <Button
-                        android:id="@+id/camRotateLeft"
-                        style="?android:attr/borderlessButtonStyle"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:background="@drawable/camera_btn"
-                        android:text="↺"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp"
-                        android:contentDescription="@string/cam_rotate_left"
-                        android:minHeight="0dp"
-                        android:minWidth="0dp"
-                        android:padding="0dp" />
-                    <Button
-                        android:id="@+id/camRotateRight"
-                        style="?android:attr/borderlessButtonStyle"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:layout_marginStart="4dp"
-                        android:background="@drawable/camera_btn"
-                        android:text="↻"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp"
-                        android:contentDescription="@string/cam_rotate_right"
-                        android:minHeight="0dp"
-                        android:minWidth="0dp"
-                        android:padding="0dp" />
-                </LinearLayout>
-
-                <Button
-                    android:id="@+id/camReset"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_marginTop="4dp"
-                    android:background="@drawable/camera_btn"
-                    android:text="⌂"
-                    android:textColor="@color/text_primary"
-                    android:textSize="14sp"
-                    android:contentDescription="@string/cam_reset"
-                    android:minHeight="0dp"
-                    android:minWidth="0dp"
-                    android:padding="0dp" />
-            </LinearLayout>
-        </FrameLayout>
-
-        <!-- Bottom status bar (Layer / Height / Laser) -->
-        <com.laserforge.lpbf.ui.CoordinateBarView
-            android:id="@+id/bottomStatusBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/status_bar_bottom_bg"
-            android:padding="8dp" />
-
-        <!-- Control Panel: Joystick + Buttons -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/panel_bg"
-            android:orientation="horizontal"
-            android:padding="15dp"
-            android:gravity="center"
-            android:layout_marginTop="8dp">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <com.laserforge.lpbf.ui.JoystickView
-                    android:id="@+id/joystickView"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp" />
-
-                <Button
-                    android:id="@+id/fireBtn"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="70dp"
-                    android:layout_height="70dp"
-                    android:layout_marginStart="15dp"
-                    android:background="@drawable/btn_laser_fire"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:textColor="@color/text_primary"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:padding="0dp"
-                    android:lineSpacingExtra="2dp"
-                    android:text="@string/fire_icon" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="15dp"
-                android:orientation="vertical"
-                android:gravity="center">
-
-                <Button
-                    android:id="@+id/nextLayerBtn"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/btn_next_layer"
-                    android:textColor="@color/text_primary"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:minHeight="40dp"
-                    android:text="@string/action_next_layer" />
-
-                <Button
-                    android:id="@+id/finishBtn"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:background="@drawable/btn_finish"
-                    android:textColor="@color/text_primary"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:minHeight="40dp"
-                    android:text="@string/action_finish" />
-
-                <Button
-                    android:id="@+id/resetBtn"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:background="@drawable/btn_reset"
-                    android:textColor="@color/text_primary"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:minHeight="40dp"
-                    android:text="@string/action_reset" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Touch hint -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/touch_hint"
-            android:textColor="@color/text_primary"
-            android:alpha="0.6"
-            android:textSize="10sp"
-            android:gravity="center"
-            android:paddingTop="8dp" />
-
-        <!-- Match result placeholder -->
-        <FrameLayout
-            android:id="@+id/matchResultContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp" />
-
-        <!-- Instructions toggle -->
-        <LinearLayout
-            android:id="@+id/instructionsToggle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/instructions_toggle_bg"
-            android:padding="10dp"
-            android:orientation="horizontal"
-            android:layout_marginTop="8dp"
-            android:gravity="center_vertical"
-            android:clickable="true"
-            android:focusable="true">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/instructions_label"
-                android:textColor="@color/text_primary"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/toggleArrow"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/instructions_arrow_down"
-                android:textColor="@color/text_primary"
-                android:textSize="12sp" />
-        </LinearLayout>
-
-        <!-- Instructions content -->
-        <LinearLayout
-            android:id="@+id/instructionsContent"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/instructions_content_bg"
-            android:orientation="vertical"
-            android:padding="12dp"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/instructions_h4_modes"
-                android:textColor="@color/instructions_h4"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:layout_marginTop="6dp" />
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_free" android:textColor="@color/text_primary" android:textSize="11sp" />
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_2d" android:textColor="@color/text_primary" android:textSize="11sp" />
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_3d" android:textColor="@color/text_primary" android:textSize="11sp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/instructions_h4_controls"
-                android:textColor="@color/instructions_h4"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:layout_marginTop="6dp" />
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_draw" android:textColor="@color/text_primary" android:textSize="11sp" />
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_joy" android:textColor="@color/text_primary" android:textSize="11sp" />
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_fire" android:textColor="@color/text_primary" android:textSize="11sp" />
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_cam" android:textColor="@color/text_primary" android:textSize="11sp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/instructions_h4_shapes"
-                android:textColor="@color/instructions_h4"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:layout_marginTop="6dp" />
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_gauss" android:textColor="@color/text_primary" android:textSize="11sp" />
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_tophat" android:textColor="@color/text_primary" android:textSize="11sp" />
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_doughnut" android:textColor="@color/text_primary" android:textSize="11sp" />
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_ellip" android:textColor="@color/text_primary" android:textSize="11sp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/instructions_h4_process"
-                android:textColor="@color/instructions_h4"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:layout_marginTop="6dp" />
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_proc1" android:textColor="@color/text_primary" android:textSize="11sp" />
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_proc2" android:textColor="@color/text_primary" android:textSize="11sp" />
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_proc3" android:textColor="@color/text_primary" android:textSize="11sp" />
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/instructions_li_proc4" android:textColor="@color/text_primary" android:textSize="11sp" />
-        </LinearLayout>
-    </LinearLayout>
-</ScrollView>
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="UselessParent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

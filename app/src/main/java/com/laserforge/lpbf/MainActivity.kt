@@ -10,15 +10,16 @@ import android.view.Choreographer
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.FrameLayout
-import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.google.android.material.slider.Slider
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.laserforge.lpbf.game.GameEngine
 import com.laserforge.lpbf.game.GameState
 import com.laserforge.lpbf.game.MatchCalculator
@@ -41,12 +42,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var nextLayerBtn: Button
     private lateinit var finishBtn: Button
     private lateinit var resetBtn: Button
-    private lateinit var laserWidthSlider: Slider
-    private lateinit var laserPowerSlider: Slider
-    private lateinit var layerThicknessSlider: Slider
-    private lateinit var laserWidthValue: TextView
-    private lateinit var laserPowerValue: TextView
-    private lateinit var layerThicknessValue: TextView
+    private lateinit var laserWidthDropdown: AutoCompleteTextView
+    private lateinit var laserPowerDropdown: AutoCompleteTextView
+    private lateinit var layerThicknessDropdown: AutoCompleteTextView
+    private lateinit var laserShapeDropdown: AutoCompleteTextView
     private lateinit var statusMessage: TextView
     private lateinit var matchResultContainer: FrameLayout
     private lateinit var instructionsContent: View
@@ -90,12 +89,10 @@ class MainActivity : AppCompatActivity() {
         nextLayerBtn = findViewById(R.id.nextLayerBtn)
         finishBtn = findViewById(R.id.finishBtn)
         resetBtn = findViewById(R.id.resetBtn)
-        laserWidthSlider = findViewById(R.id.laserWidthSlider)
-        laserPowerSlider = findViewById(R.id.laserPowerSlider)
-        layerThicknessSlider = findViewById(R.id.layerThicknessSlider)
-        laserWidthValue = findViewById(R.id.laserWidthValue)
-        laserPowerValue = findViewById(R.id.laserPowerValue)
-        layerThicknessValue = findViewById(R.id.layerThicknessValue)
+        laserWidthDropdown = findViewById(R.id.laserWidthDropdown)
+        laserPowerDropdown = findViewById(R.id.laserPowerDropdown)
+        layerThicknessDropdown = findViewById(R.id.layerThicknessDropdown)
+        laserShapeDropdown = findViewById(R.id.laserShapeDropdown)
         statusMessage = findViewById(R.id.statusMessage)
         matchResultContainer = findViewById(R.id.matchResultContainer)
         instructionsContent = findViewById(R.id.instructionsContent)
@@ -117,8 +114,7 @@ class MainActivity : AppCompatActivity() {
 
         setupModeButtons()
         setupShapeChoiceButtons()
-        setupLaserShapeButtons()
-        setupSliders()
+        setupLaserSettingsDropdowns()
         setupActionButtons()
         setupCameraButtons()
         setupJoystickAndFire()
@@ -171,6 +167,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun applySnapshot(snap: GameEngine.Snapshot) {
         val r = gameView.renderer
+        if (!r.isInitialized) return
         r.camera.theta = snap.cameraTheta
         r.camera.phi = snap.cameraPhi
         r.camera.distance = snap.cameraDistance
@@ -337,57 +334,55 @@ class MainActivity : AppCompatActivity() {
         target3dView.visibility = View.VISIBLE
         // Build voxel meshes for the preview.
         val meshes = engine.buildTargetPreviewMeshes()
-        // Center the group vertically.
-        if (meshes.isNotEmpty()) {
-            val voxelSize = 0.15f
-            val minY = 0f
-            val maxY = (engine.targetVoxels.maxOfOrNull { it.layer } ?: 0) * voxelSize
-            val cy = (minY + maxY) / 2f
-            for (m in meshes) {
-                MatrixUtil.translate(m.transform, m.transform[12], m.transform[13] - cy, m.transform[14])
-            }
-        }
         target3dView.setTarget(meshes, shape.name)
     }
 
     // -----------------------------------------------------------------------
-    // Setup: laser shape chips
+    // Setup: laser settings dropdowns
     // -----------------------------------------------------------------------
-    private fun setupLaserShapeButtons() {
-        val bGauss = findViewById<Button>(R.id.shapeGaussianBtn)
-        val bTop = findViewById<Button>(R.id.shapeTophatBtn)
-        val bDough = findViewById<Button>(R.id.shapeDoughnutBtn)
-        val bEll = findViewById<Button>(R.id.shapeEllipticalBtn)
-        val setActive = { active: Button ->
-            for (b in listOf(bGauss, bTop, bDough, bEll)) b.setBackgroundResource(R.drawable.btn_shape_option)
-            active.setBackgroundResource(R.drawable.btn_shape_option_active)
+    private fun setupLaserSettingsDropdowns() {
+        // Laser Shapes
+        val shapes = arrayOf(getString(R.string.shape_gaussian), getString(R.string.shape_tophat),
+            getString(R.string.shape_doughnut), getString(R.string.shape_elliptical))
+        val shapeAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, shapes)
+        laserShapeDropdown.setAdapter(shapeAdapter)
+        laserShapeDropdown.setText(shapes[0], false)
+        laserShapeDropdown.setOnItemClickListener { _, _, position, _ ->
+            engine.laserShape = when(position) {
+                0 -> "gaussian"
+                1 -> "tophat"
+                2 -> "doughnut"
+                3 -> "elliptical"
+                else -> "gaussian"
+            }
         }
-        bGauss.setOnClickListener { setActive(it as Button); engine.laserShape = "gaussian" }
-        bTop.setOnClickListener { setActive(it as Button); engine.laserShape = "tophat" }
-        bDough.setOnClickListener { setActive(it as Button); engine.laserShape = "doughnut" }
-        bEll.setOnClickListener { setActive(it as Button); engine.laserShape = "elliptical" }
-    }
 
-    // -----------------------------------------------------------------------
-    // Setup: sliders
-    // -----------------------------------------------------------------------
-    private fun setupSliders() {
-        laserWidthSlider.addOnChangeListener { _, value, _ ->
-            engine.laserWidth = value
-            laserWidthValue.text = String.format("%.1fmm", value)
+        // Laser Width
+        val widths = arrayOf("1.0", "1.5", "2.0", "2.5", "3.0", "4.0", "5.0")
+        val widthAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, widths)
+        laserWidthDropdown.setAdapter(widthAdapter)
+        laserWidthDropdown.setText("2.0", false)
+        laserWidthDropdown.setOnItemClickListener { _, _, position, _ ->
+            engine.laserWidth = widths[position].toFloat()
         }
-        laserPowerSlider.addOnChangeListener { _, value, _ ->
-            engine.laserPower = value.toInt()
-            laserPowerValue.text = "${value.toInt()}W"
+
+        // Laser Power
+        val powers = arrayOf("50", "75", "100", "125", "150", "175", "200")
+        val powerAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, powers)
+        laserPowerDropdown.setAdapter(powerAdapter)
+        laserPowerDropdown.setText("100", false)
+        laserPowerDropdown.setOnItemClickListener { _, _, position, _ ->
+            engine.laserPower = powers[position].toInt()
         }
-        layerThicknessSlider.addOnChangeListener { _, value, _ ->
-            engine.layerThickness = value
-            layerThicknessValue.text = String.format("%.2fmm", value)
+
+        // Layer Thickness
+        val thicknesses = arrayOf("0.05", "0.08", "0.10", "0.12", "0.15", "0.20", "0.25", "0.30")
+        val thicknessAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, thicknesses)
+        layerThicknessDropdown.setAdapter(thicknessAdapter)
+        layerThicknessDropdown.setText("0.12", false)
+        layerThicknessDropdown.setOnItemClickListener { _, _, position, _ ->
+            engine.layerThickness = thicknesses[position].toFloat()
         }
-        // Initial values
-        laserWidthValue.text = String.format("%.1fmm", engine.laserWidth)
-        laserPowerValue.text = "${engine.laserPower}W"
-        layerThicknessValue.text = String.format("%.2fmm", engine.layerThickness)
     }
 
     // -----------------------------------------------------------------------
@@ -450,6 +445,13 @@ class MainActivity : AppCompatActivity() {
         topBar.setCoordY(0f)
         topBar.setPointerStatus("ready")
         bottomBar.setLaserStatus(getString(R.string.laser_ready))
+        
+        // Reset dropdowns to defaults
+        laserShapeDropdown.setText(getString(R.string.shape_gaussian), false)
+        laserWidthDropdown.setText("2.0", false)
+        laserPowerDropdown.setText("100", false)
+        layerThicknessDropdown.setText("0.12", false)
+
         // Status message based on mode.
         val msg = when {
             engine.gameMode == "free" -> getString(R.string.status_free)
@@ -502,10 +504,42 @@ class MainActivity : AppCompatActivity() {
     // -----------------------------------------------------------------------
     private fun setupInstructionsToggle() {
         findViewById<View>(R.id.instructionsToggle).setOnClickListener {
-            val visible = instructionsContent.visibility == View.VISIBLE
-            instructionsContent.visibility = if (visible) View.GONE else View.VISIBLE
-            toggleArrow.text = if (visible) getString(R.string.instructions_arrow_down) else getString(R.string.instructions_arrow_up)
+            showInstructionsDialog()
         }
+    }
+
+    private fun showInstructionsDialog() {
+        val message = StringBuilder()
+        message.append("<b>" + getString(R.string.instructions_h4_modes) + "</b><br/>")
+        message.append(getString(R.string.instructions_li_free).replace("<b>", "").replace("</b>", "") + "<br/>")
+        message.append(getString(R.string.instructions_li_2d).replace("<b>", "").replace("</b>", "") + "<br/>")
+        message.append(getString(R.string.instructions_li_3d).replace("<b>", "").replace("</b>", "") + "<br/><br/>")
+        
+        message.append("<b>" + getString(R.string.instructions_h4_controls) + "</b><br/>")
+        message.append(getString(R.string.instructions_li_draw).replace("<b>", "").replace("</b>", "") + "<br/>")
+        message.append(getString(R.string.instructions_li_joy).replace("<b>", "").replace("</b>", "") + "<br/>")
+        message.append(getString(R.string.instructions_li_fire).replace("<b>", "").replace("</b>", "") + "<br/>")
+        message.append(getString(R.string.instructions_li_cam).replace("<b>", "").replace("</b>", "") + "<br/><br/>")
+        
+        message.append("<b>" + getString(R.string.instructions_h4_shapes) + "</b><br/>")
+        message.append(getString(R.string.instructions_li_gauss).replace("<b>", "").replace("</b>", "") + "<br/>")
+        message.append(getString(R.string.instructions_li_tophat).replace("<b>", "").replace("</b>", "") + "<br/>")
+        message.append(getString(R.string.instructions_li_doughnut).replace("<b>", "").replace("</b>", "") + "<br/>")
+        message.append(getString(R.string.instructions_li_ellip).replace("<b>", "").replace("</b>", "") + "<br/><br/>")
+        
+        message.append("<b>" + getString(R.string.instructions_h4_process) + "</b><br/>")
+        message.append(getString(R.string.instructions_li_proc1) + "<br/>")
+        message.append(getString(R.string.instructions_li_proc2) + "<br/>")
+        message.append(getString(R.string.instructions_li_proc3) + "<br/>")
+        message.append(getString(R.string.instructions_li_proc4))
+
+        val spanned = android.text.Html.fromHtml(message.toString(), android.text.Html.FROM_HTML_MODE_LEGACY)
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.instructions_label)
+            .setMessage(spanned)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
     }
 
     private fun dp(v: Float): Int = (v * resources.displayMetrics.density).toInt()

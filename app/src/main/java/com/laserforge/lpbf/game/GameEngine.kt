@@ -61,12 +61,12 @@ class GameEngine {
     private val powderMaterial = Material(0xa8 / 255f, 0x90 / 255f, 0x70 / 255f, 0.85f)
     private val powderParticleMaterial = Material(0xa8 / 255f, 0x90 / 255f, 0x70 / 255f, 1f)
     private val chamberMaterial = Material(0.1f, 0.1f, 0.1f, 1f)
-    private val wallMaterial = Material(0.165f, 0.165f, 0.165f, 0.3f)
+    private val wallMaterial = Material(0.4f, 0.6f, 1.0f, 0.15f) // Transparent blue-ish glass
     private val platformMaterial = Material(0.2f, 0.2f, 0.2f, 1f)
     private val recoaterBodyMaterial = Material(0.4f, 0.4f, 0.4f, 1f)
     private val recoaterBladeMaterial = Material(0.533f, 0.533f, 0.533f, 1f)
     private val powderStockMaterial = Material(0x8b / 255f, 0x73 / 255f, 0x55 / 255f, 1f)
-    private val previewMaterial = Material(0f, 0.831f, 1f, 0.9f)
+    private val previewMaterial = Material(0f, 0.831f, 1f, 1.0f) // Opaque for preview
     private val laserBeamMaterial = Material(1f, 0f, 0f, 0.6f)
     private val previewMarkerMaterial = Material(1f, 1f, 0f, 0.8f)
 
@@ -100,7 +100,7 @@ class GameEngine {
     // Preview marker (yellow ring) — visible when in DRAWING and not firing.
     var previewMarkerVisible: Boolean = false
 
-    // Camera reset (matches HTML defaults: theta=π/4, phi=π/4, distance=22)
+    // Camera reset (theta=π/4, phi=π/4, distance=22)
     var cameraTheta: Float = (Math.PI / 4).toFloat()
     var cameraPhi: Float = (Math.PI / 4).toFloat()
     var cameraDistance: Float = 22f
@@ -179,8 +179,12 @@ class GameEngine {
     fun onDrawing(x: Float, z: Float) {
         synchronized(this) {
             if (gameState != GameState.DRAWING) return
-            addVoxel(x, z)
-            createLaserBeam(x, z)
+            val maxPos = (chamberSize - 1f) / 2f
+            val cx = x.coerceIn(-maxPos, maxPos)
+            val cz = z.coerceIn(-maxPos, maxPos)
+            laserPosition = cx to cz
+            addVoxel(cx, cz)
+            createLaserBeam(cx, cz)
         }
     }
 
@@ -295,10 +299,13 @@ class GameEngine {
 
     private fun createLaserBeam(x: Float, z: Float) {
         val beamRadius = 0.03f + (laserWidth - 1f) * 0.01f
-        val beam = MeshBuilder.cylinder(beamRadius, beamRadius, 10f, 8)
+        // Laser comes from top (y=10) down to buildSurfaceY.
+        val beamLength = 10f - buildSurfaceY
+        val beam = MeshBuilder.cylinder(beamRadius, beamRadius, beamLength, 8)
         beam.material = laserBeamMaterial
-        // Cylinder is along Y in our builder; translate to (x, buildSurfaceY+5, z).
-        MatrixUtil.translate(beam.transform, x, buildSurfaceY + 5f, z)
+        // Position it so it spans from top to surface.
+        val midY = (10f + buildSurfaceY) / 2f
+        MatrixUtil.translate(beam.transform, x, midY, z)
         laserBeamMesh = beam
         laserBeamActive = true
     }
@@ -522,19 +529,19 @@ class GameEngine {
         out.add(chamber)
 
         // 4 walls around the build area (centered at origin, matching HTML)
-        val wallL = MeshBuilder.box(0.2f, 8f, chamberSize)
+        val wallL = MeshBuilder.box(0.05f, 8f, chamberSize)
         wallL.material = wallMaterial
         MatrixUtil.translate(wallL.transform, -chamberSize / 2, 0f, 0f)
         out.add(wallL)
-        val wallR = MeshBuilder.box(0.2f, 8f, chamberSize)
+        val wallR = MeshBuilder.box(0.05f, 8f, chamberSize)
         wallR.material = wallMaterial
         MatrixUtil.translate(wallR.transform, chamberSize / 2, 0f, 0f)
         out.add(wallR)
-        val wallB = MeshBuilder.box(chamberSize, 8f, 0.2f)
+        val wallB = MeshBuilder.box(chamberSize, 8f, 0.05f)
         wallB.material = wallMaterial
         MatrixUtil.translate(wallB.transform, 0f, 0f, -chamberSize / 2)
         out.add(wallB)
-        val wallF = MeshBuilder.box(chamberSize, 8f, 0.2f)
+        val wallF = MeshBuilder.box(chamberSize, 8f, 0.05f)
         wallF.material = wallMaterial
         MatrixUtil.translate(wallF.transform, 0f, 0f, chamberSize / 2)
         out.add(wallF)
@@ -588,46 +595,103 @@ class GameEngine {
     }
 
     fun buildCoordinateLabels(): List<Mesh> {
-        // Coordinate label ticks positioned like the HTML text sprites.
-        // X-axis ticks (cyan) along the front edge (positive Z).
-        // Z-axis ticks (yellow) along the right edge (positive X).
         val out = ArrayList<Mesh>()
         val labelZ = chamberSize / 2 + 1.5f
         val labelX = chamberSize / 2 + 1.5f
-        for (i in -4..4) {
-            val x = i * ((chamberSize - 1) / 10)
-            val tick = MeshBuilder.box(0.5f, 0.01f, 0.05f)
-            tick.material = Material(0f, 1f, 1f, 1f)
-            MatrixUtil.translate(tick.transform, x, buildSurfaceY - 0.3f, labelZ)
-            out.add(tick)
+        
+        val tickMaterial = Material(0.4f, 0.4f, 0.4f, 1f)
+        val labelMaterial = Material(1f, 1f, 1f, 0.99f).let {
+            Material(it.r, it.g, it.b, it.alpha, it.r * 0.5f, it.g * 0.5f, it.b * 0.5f)
         }
+
+        // X-axis numerical labels (consistent increments of 1.0)
         for (i in -4..4) {
-            val z = i * ((chamberSize - 1) / 10)
-            val tick = MeshBuilder.box(0.05f, 0.01f, 0.5f)
-            tick.material = Material(1f, 1f, 0f, 1f)
-            MatrixUtil.translate(tick.transform, labelX, buildSurfaceY - 0.3f, z)
+            val x = i.toFloat()
+            // Ticks
+            val tick = MeshBuilder.box(0.1f, 0.01f, 0.4f)
+            tick.material = tickMaterial
+            MatrixUtil.translate(tick.transform, x, buildSurfaceY, labelZ - 0.2f)
             out.add(tick)
+            
+            // Numeric Label
+            val valStr = i.toString()
+            val m = MeshBuilder.plane(0.5f, 0.5f, hasUV = true)
+            m.material = labelMaterial
+            m.labelText = valStr
+            // Rotate to lie flat on XZ plane and parallel to X axis
+            val rotX = FloatArray(16); MatrixUtil.rotateX(rotX, -(Math.PI / 2).toFloat())
+            val rotY = FloatArray(16); MatrixUtil.rotateY(rotY, (Math.PI / 2).toFloat())
+            val rot = FloatArray(16); MatrixUtil.multiply(rot, rotY, rotX)
+            val trans = FloatArray(16); MatrixUtil.translate(trans, x, buildSurfaceY + 0.05f, labelZ + 0.6f)
+            MatrixUtil.multiply(m.transform, trans, rot)
+            out.add(m)
         }
-        // Axis name markers (larger ticks) matching HTML X / Y labels.
-        val xMarker = MeshBuilder.box(0.6f, 0.02f, 0.08f)
-        xMarker.material = Material(0f, 1f, 1f, 1f)
-        MatrixUtil.translate(xMarker.transform, 0f, buildSurfaceY - 0.3f, labelZ + 1f)
-        out.add(xMarker)
-        val zMarker = MeshBuilder.box(0.08f, 0.02f, 0.6f)
-        zMarker.material = Material(1f, 1f, 0f, 1f)
-        MatrixUtil.translate(zMarker.transform, labelX + 1f, buildSurfaceY - 0.3f, 0f)
-        out.add(zMarker)
-        // Component labels as colored blocks.
-        // "POWDER STOCK" marker on the left.
-        val stockLabel = MeshBuilder.box(2f, 0.02f, 0.3f)
-        stockLabel.material = Material(1f, 0.6f, 0f, 1f)
-        MatrixUtil.translate(stockLabel.transform, -chamberSize / 2 - 1.5f, buildSurfaceY, 0f)
+
+        // Z-axis numerical labels
+        for (i in -4..4) {
+            val z = i.toFloat()
+            // Ticks
+            val tick = MeshBuilder.box(0.4f, 0.01f, 0.1f)
+            tick.material = tickMaterial
+            MatrixUtil.translate(tick.transform, labelX - 0.2f, buildSurfaceY, z)
+            out.add(tick)
+            
+            // Numeric Label
+            val valStr = i.toString()
+            val m = MeshBuilder.plane(0.5f, 0.5f, hasUV = true)
+            m.material = labelMaterial
+            m.labelText = valStr
+            // Rotate to lie flat on XZ plane and parallel to Z axis
+            val rotX = FloatArray(16); MatrixUtil.rotateX(rotX, -(Math.PI / 2).toFloat())
+            val rotY = FloatArray(16); MatrixUtil.rotateY(rotY, (Math.PI / 2).toFloat())
+            val rot = FloatArray(16); MatrixUtil.multiply(rot, rotY, rotX)
+            val trans = FloatArray(16); MatrixUtil.translate(trans, labelX + 0.6f, buildSurfaceY + 0.05f, z)
+            MatrixUtil.multiply(m.transform, trans, rot)
+            out.add(m)
+        }
+
+        // Axis name markers "X" and "Y"
+        val xLabel = MeshBuilder.plane(1.2f, 1.2f, hasUV = true)
+        xLabel.material = Material(0f, 1f, 1f, 0.99f, 0f, 0.5f, 0.5f)
+        xLabel.labelText = "X"
+        val rotX = FloatArray(16); MatrixUtil.rotateX(rotX, -(Math.PI / 2).toFloat())
+        val transX = FloatArray(16); MatrixUtil.translate(transX, 0f, buildSurfaceY + 0.05f, labelZ + 1.2f)
+        MatrixUtil.multiply(xLabel.transform, transX, rotX)
+        out.add(xLabel)
+
+        val yLabel = MeshBuilder.plane(1.2f, 1.2f, hasUV = true)
+        yLabel.material = Material(1f, 1f, 0f, 0.99f, 0.5f, 0.5f, 0f)
+        yLabel.labelText = "Y"
+        val rotY_X = FloatArray(16); MatrixUtil.rotateX(rotY_X, -(Math.PI / 2).toFloat())
+        val transY = FloatArray(16); MatrixUtil.translate(transY, labelX + 1.2f, buildSurfaceY + 0.05f, 0f)
+        MatrixUtil.multiply(yLabel.transform, transY, rotY_X)
+        out.add(yLabel)
+
+        // "POWDER STOCK" label
+        val stockLabel = MeshBuilder.plane(4f, 1.0f, hasUV = true)
+        stockLabel.material = Material(1f, 0.6f, 0f, 0.99f, 0.5f, 0.3f, 0f)
+        stockLabel.labelText = "POWDER STOCK"
+        // Rotate 90 deg from current (was rotY*rotX) -> just rotX
+        val rotX_S = FloatArray(16); MatrixUtil.rotateX(rotX_S, -(Math.PI / 2).toFloat())
+        val rotY_S = FloatArray(16); MatrixUtil.rotateY(rotY_S, (Math.PI / 2).toFloat())
+        val rot_S = FloatArray(16); MatrixUtil.multiply(rot_S, rotY_S, rotX_S)
+        MatrixUtil.translate(stockLabel.transform, -chamberSize / 2 - 1.8f, buildSurfaceY + 0.1f, 0f)
+        MatrixUtil.multiply(stockLabel.transform, stockLabel.transform.clone(), rot_S)
         out.add(stockLabel)
-        // "BUILD PLATFORM" marker on the platform.
-        val bedLabel = MeshBuilder.box(2f, 0.02f, 0.3f)
-        bedLabel.material = Material(0f, 1f, 0f, 1f)
-        MatrixUtil.translate(bedLabel.transform, 0f, buildSurfaceY + 0.2f, 0f)
+
+        // "BUILD PLATE" label
+        val bedLabel = MeshBuilder.plane(4f, 1.0f, hasUV = true)
+        bedLabel.material = Material(0f, 1f, 0f, 0.99f, 0f, 0.5f, 0f)
+        bedLabel.labelText = "BUILD PLATE"
+        // Rotate 90 deg from current (was just rotX) -> rotY*rotX
+        val rotX_B = FloatArray(16); MatrixUtil.rotateX(rotX_B, -(Math.PI / 2).toFloat())
+        val rotY_B = FloatArray(16); MatrixUtil.rotateY(rotY_B, (Math.PI / 2).toFloat())
+        val rot_B = FloatArray(16); MatrixUtil.multiply(rot_B, rotY_B, rotX_B)
+        // Position at the front edge (positive X), aligned with the edge
+        MatrixUtil.translate(bedLabel.transform, (chamberSize - 1f) / 2f + 0.3f, buildSurfaceY + 0.1f, 0f)
+        MatrixUtil.multiply(bedLabel.transform, bedLabel.transform.clone(), rot_B)
         out.add(bedLabel)
+
         return out
     }
 

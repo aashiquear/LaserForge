@@ -88,25 +88,27 @@ object MatrixUtil {
         val fy = center[1] - eye[1]
         val fz = center[2] - eye[2]
         val rlf = 1f / kotlin.math.sqrt((fx * fx + fy * fy + fz * fz).toDouble()).toFloat()
-        val fnx = fx * rlf; val fny = fy * rlf; val fnz = fz * rlf
+        val fX = fx * rlf; val fY = fy * rlf; val fZ = fz * rlf
 
-        val sxf = up[1] * fnz - up[2] * fny
-        val syf = up[2] * fnx - up[0] * fnz
-        val szf = up[0] * fny - up[1] * fnx
-        val rls = 1f / kotlin.math.sqrt((sxf * sxf + syf * syf + szf * szf).toDouble()).toFloat()
-        val sx = sxf * rls; val sy = syf * rls; val sz = szf * rls
+        // s = f x up (Right vector)
+        var sX = fY * up[2] - fZ * up[1]
+        var sY = fZ * up[0] - fX * up[2]
+        var sZ = fX * up[1] - fY * up[0]
+        val rls = 1f / kotlin.math.sqrt((sX * sX + sY * sY + sZ * sZ).toDouble()).toFloat()
+        sX *= rls; sY *= rls; sZ *= rls
 
-        val ux = sy * fnz - sz * fny
-        val uy = sz * fnx - sx * fnz
-        val uz = sx * fny - sy * fnx
+        // u = s x f (Up vector)
+        val uX = sY * fZ - sZ * fY
+        val uY = sZ * fX - sX * fZ
+        val uZ = sX * fY - sY * fX
 
         identity(out)
-        out[0] = sx; out[4] = sy; out[8] = sz
-        out[1] = ux; out[5] = uy; out[9] = uz
-        out[2] = -fnx; out[6] = -fny; out[10] = -fnz
-        out[12] = -(sx * eye[0] + sy * eye[1] + sz * eye[2])
-        out[13] = -(ux * eye[0] + uy * eye[1] + uz * eye[2])
-        out[14] = fnx * eye[0] + fny * eye[1] + fnz * eye[2]
+        out[0] = sX; out[4] = sY; out[8] = sZ
+        out[1] = uX; out[5] = uY; out[9] = uZ
+        out[2] = -fX; out[6] = -fY; out[10] = -fZ
+        out[12] = -(sX * eye[0] + sY * eye[1] + sZ * eye[2])
+        out[13] = -(uX * eye[0] + uY * eye[1] + uZ * eye[2])
+        out[14] = fX * eye[0] + fY * eye[1] + fZ * eye[2]
     }
 
     fun transpose(out: FloatArray, m: FloatArray) {

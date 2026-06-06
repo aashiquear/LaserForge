@@ -70,24 +70,27 @@ class ShaderProgram(vertexSrc: String, fragmentSrc: String) {
     companion object {
         private const val TAG = "ShaderProgram"
 
-        /** Lit vertex shader: takes world position + normal, passes through to fragment. */
+        /** Lit vertex shader: takes world position + normal + uv, passes through to fragment. */
         val LIT_VERT = """
             uniform mat4 uMVP;
             uniform mat4 uModel;
             uniform mat4 uNormalMat;
             attribute vec3 aPos;
             attribute vec3 aNormal;
+            attribute vec2 aUV;
             varying vec3 vWorldPos;
             varying vec3 vNormal;
+            varying vec2 vUV;
             void main() {
                 vec4 worldPos = uModel * vec4(aPos, 1.0);
                 vWorldPos = worldPos.xyz;
                 vNormal = mat3(uNormalMat) * aNormal;
+                vUV = aUV;
                 gl_Position = uMVP * vec4(aPos, 1.0);
             }
         """.trimIndent()
 
-        /** Lit fragment shader: Lambert + ambient + emissive for up to 3 directional + 1 point light. */
+        /** Lit fragment shader: Lambert + ambient + emissive for up to 3 directional + 1 point light. Support textures. */
         val LIT_FRAG = """
             precision mediump float;
             uniform vec3 uAlbedo;
@@ -106,18 +109,30 @@ class ShaderProgram(vertexSrc: String, fragmentSrc: String) {
             uniform float uPointLightIntensity;
             uniform float uPointLightRange;
             uniform int uHasPointLight;
+            
+            uniform sampler2D uTex;
+            uniform int uUseTex;
 
             varying vec3 vWorldPos;
             varying vec3 vNormal;
+            varying vec2 vUV;
 
             void main() {
+                vec4 baseColor = vec4(uAlbedo, uAlpha);
+                if (uUseTex == 1) {
+                    vec4 texColor = texture2D(uTex, vUV);
+                    baseColor *= texColor;
+                }
+                
+                if (baseColor.a < 0.1) discard;
+
                 vec3 N = normalize(vNormal);
-                vec3 result = uAmbient * uAlbedo;
+                vec3 result = uAmbient * baseColor.rgb;
                 for (int i = 0; i < 3; i++) {
                     if (i >= uDirLightCount) break;
                     vec3 L = normalize(uDirLightPos[i]);
                     float diff = max(dot(N, L), 0.0);
-                    result += diff * uDirLightColor[i] * uDirLightIntensity[i] * uAlbedo;
+                    result += diff * uDirLightColor[i] * uDirLightIntensity[i] * baseColor.rgb;
                 }
                 if (uHasPointLight == 1) {
                     vec3 Lvec = uPointLightPos - vWorldPos;
@@ -126,11 +141,11 @@ class ShaderProgram(vertexSrc: String, fragmentSrc: String) {
                         vec3 L = Lvec / d;
                         float diff = max(dot(N, L), 0.0);
                         float atten = max(0.0, 1.0 - d / uPointLightRange);
-                        result += diff * atten * uPointLightColor * uPointLightIntensity * uAlbedo;
+                        result += diff * atten * uPointLightColor * uPointLightIntensity * baseColor.rgb;
                     }
                 }
                 result += uEmissive;
-                gl_FragColor = vec4(result, uAlpha);
+                gl_FragColor = vec4(result, baseColor.a);
             }
         """.trimIndent()
 
